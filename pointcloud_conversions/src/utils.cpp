@@ -33,3 +33,16 @@ void pointcloud_utils::publishPointCloudXYZ(ros::Publisher pub, pcl::PointCloud<
   cloud_msg.header.frame_id = frame_id;
   pub.publish(cloud_msg);
 }
+
+PointCloudProperties pointcloud_utils::computePointCloudMinMax(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud){
+  PointCloudProperties results;
+  pcl::PointXYZ minPoint, maxPoint;
+  pcl::getMinMax3D(*cloud, minPoint, maxPoint);
+  const Eigen::Vector3f meanDiagonal = 0.5f*(maxPoint.getVector3fMap() + minPoint.getVector3fMap());
+  results.min_point = minPoint;
+  results.max_point = maxPoint;
+  std::cout << "Min Point: " << minPoint.x << " " << minPoint.y << " " << minPoint.z << "\n";
+  std::cout << "Max Point: " << maxPoint.x << " " << maxPoint.y << " " << maxPoint.z << "\n";
+
+  return results;
+}

@@ -6,6 +6,7 @@
 
 #include <Eigen/Core>
 
+#include <pcl/common/common.h>
 #include <pcl/common/transforms.h>
 #include <pcl/conversions.h>
 #include <pcl/point_cloud.h>
@@ -23,12 +24,19 @@
 #include <pcl/filters/passthrough.h>
 #include <pcl/registration/icp.h>
 
+
+struct PointCloudProperties{
+  pcl::PointXYZ min_point, max_point;
+};
+
 namespace pointcloud_utils{
 
   Eigen::Vector3d computePointCloudMedian(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud);
   Eigen::Vector3d computePointCloudMedian(std::vector<double> cluster_pt_x, std::vector<double> cluster_pt_y, std::vector<double> cluster_pt_z);
-  
+
   void publishPointCloudXYZ(ros::Publisher pub, pcl::PointCloud<pcl::PointXYZ> &pcl_cloud, std::string frame_id);
+
+  PointCloudProperties computePointCloudMinMax(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud);
 
 };
 
