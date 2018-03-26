@@ -34,6 +34,15 @@ void pointcloud_utils::publishPointCloudXYZ(ros::Publisher pub, pcl::PointCloud<
   pub.publish(cloud_msg);
 }
 
+void pointcloud_utils::publishPointCloudXYZRGB(ros::Publisher pub, pcl::PointCloud<pcl::PointXYZRGB> &pcl_cloud, std::string frame_id){
+  pcl::PCLPointCloud2 pcl_pc2;
+  pcl::toPCLPointCloud2(pcl_cloud, pcl_pc2);
+  sensor_msgs::PointCloud2 cloud_msg;
+  pcl_conversions::fromPCL(pcl_pc2, cloud_msg);
+  cloud_msg.header.frame_id = frame_id;
+  pub.publish(cloud_msg);
+}
+
 PointCloudProperties pointcloud_utils::computePointCloudMinMax(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud){
   PointCloudProperties results;
   pcl::PointXYZ minPoint, maxPoint;
@@ -45,4 +54,31 @@ PointCloudProperties pointcloud_utils::computePointCloudMinMax(pcl::PointCloud<p
   std::cout << "Max Point: " << maxPoint.x << " " << maxPoint.y << " " << maxPoint.z << "\n";
 
   return results;
+}
+
+pcl::PointCloud<pcl::PointXYZRGB>::Ptr pointcloud_utils::createColorizedPointCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, int r, int g, int b){
+  pcl::PointCloud<pcl::PointXYZRGB>::Ptr colored_cloud;
+  colored_cloud = (new pcl::PointCloud<pcl::PointXYZRGB>)->makeShared();
+
+  colored_cloud->width = cloud->width;
+  colored_cloud->height = cloud->height;
+  colored_cloud->is_dense = true; //cloud->is_dense;
+
+  std::vector<double> cloud_pts_x, cloud_pts_y, cloud_pts_z;
+  for (size_t i_point = 0; i_point < cloud->points.size (); i_point++){
+     pcl::PointXYZRGB point;
+     point.x = *(cloud->points[i_point].data);
+     point.y = *(cloud->points[i_point].data + 1);
+     point.z = *(cloud->points[i_point].data + 2);
+     point.r = r;
+     point.g = g;
+     point.b = b;
+
+     cloud_pts_x.push_back(point.x);
+     cloud_pts_y.push_back(point.y);
+     cloud_pts_z.push_back(point.z);
+
+     colored_cloud->points.push_back(point);
+  }
+  return colored_cloud;
 }
