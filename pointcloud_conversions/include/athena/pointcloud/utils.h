@@ -24,6 +24,9 @@
 #include <pcl/filters/passthrough.h>
 #include <pcl/registration/icp.h>
 
+#include <pcl/segmentation/sac_segmentation.h>
+#include <pcl/segmentation/extract_clusters.h>
+
 
 struct PointCloudProperties{
   pcl::PointXYZ min_point, max_point;
@@ -40,6 +43,9 @@ namespace pointcloud_utils{
   PointCloudProperties computePointCloudMinMax(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud);
 
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr createColorizedPointCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, int r, int g, int b);
+
+  pcl::PointCloud<pcl::PointXYZ>::Ptr getMaxEuclideanClusterFromPointCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud, double tolerance);
+
 
 };
 

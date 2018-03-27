@@ -42,14 +42,22 @@ Eigen::Matrix4d transform_conversions::translation_matrix(double x, double y, do
 }
 
 
+Eigen::Vector3d transform_conversions::translation_from_matrix(Eigen::Matrix4d matrix){
+  Eigen::Affine3d affine_matrix;
+  affine_matrix.matrix() = matrix;
+  return affine_matrix.translation();
+}
+
 Eigen::Matrix4d transform_conversions::euler_matrix(double roll, double pitch, double yaw){
-  Eigen::Matrix4d matrix = Eigen::Matrix4d::Identity();
-  Eigen::AngleAxisd rollAngle(roll, Eigen::Vector3d::UnitZ());
-  Eigen::AngleAxisd yawAngle(yaw, Eigen::Vector3d::UnitY());
-  Eigen::AngleAxisd pitchAngle(pitch, Eigen::Vector3d::UnitX());
-  Eigen::Quaternion<double> q = rollAngle * yawAngle * pitchAngle;
-  matrix.block<3,3>(0,0) = q.matrix();
-  return matrix;
+  tf::Transform transform;
+  transform.setOrigin(tf::Vector3(0.0, 0.0, 0.0));
+  tf::Quaternion q;
+  q.setRPY(roll, pitch, yaw);
+  transform.setRotation(q);
+
+  Eigen::Isometry3d tf_matrix;
+  tf::transformTFToEigen(transform,  tf_matrix);
+  return tf_matrix.matrix();
 }
 
 void transform_conversions::publish_matrix_as_tf(tf::TransformBroadcaster &br, Eigen::Matrix4d transformation_matrix, std::string source, std::string dest){
@@ -62,6 +70,9 @@ void transform_conversions::publish_matrix_as_tf(tf::TransformBroadcaster &br, E
   br.sendTransform(tf::StampedTransform(t, ros::Time::now(), source, dest));
 }
 
+void transform_conversions::publish_matrix_as_tf(tf::TransformBroadcaster &br, Eigen::Affine3d transformation_matrix, std::string source, std::string dest){
+  publish_matrix_as_tf(br, transformation_matrix.matrix(), source, dest);
+}
 
 Eigen::Matrix4d transform_conversions::array_to_eigen4d_matrix(const float transform[]){
   Eigen::MatrixXd obj_pose;

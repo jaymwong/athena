@@ -47,13 +47,46 @@ PointCloudProperties pointcloud_utils::computePointCloudMinMax(pcl::PointCloud<p
   PointCloudProperties results;
   pcl::PointXYZ minPoint, maxPoint;
   pcl::getMinMax3D(*cloud, minPoint, maxPoint);
-  const Eigen::Vector3f meanDiagonal = 0.5f*(maxPoint.getVector3fMap() + minPoint.getVector3fMap());
   results.min_point = minPoint;
   results.max_point = maxPoint;
-  std::cout << "Min Point: " << minPoint.x << " " << minPoint.y << " " << minPoint.z << "\n";
-  std::cout << "Max Point: " << maxPoint.x << " " << maxPoint.y << " " << maxPoint.z << "\n";
 
+  // std::cout << "Min Point: " << minPoint.x << " " << minPoint.y << " " << minPoint.z << "\n";
+  // std::cout << "Max Point: " << maxPoint.x << " " << maxPoint.y << " " << maxPoint.z << "\n";
   return results;
+}
+
+pcl::PointCloud<pcl::PointXYZ>::Ptr pointcloud_utils::getMaxEuclideanClusterFromPointCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud, double tolerance){
+  // Creating the KdTree object for the search method of the extraction
+  pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ>);
+  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_extract = pcl::PointCloud<pcl::PointXYZ>::Ptr(new pcl::PointCloud<pcl::PointXYZ>);
+  tree->setInputCloud (input_cloud);
+
+  std::vector<pcl::PointIndices> cluster_indices;
+  pcl::EuclideanClusterExtraction<pcl::PointXYZ> ec;
+  ec.setClusterTolerance (tolerance); // 2cm
+  ec.setMinClusterSize (100);
+  ec.setMaxClusterSize (25000);
+  ec.setSearchMethod (tree);
+  ec.setInputCloud (input_cloud);
+  ec.extract (cluster_indices);
+
+  if (cluster_indices.size() == 0 ){ return cloud_extract; }
+
+  std::vector<int> cluster_sizes;
+  for (int i = 0; i < cluster_indices.size(); i++){
+    cluster_sizes.push_back(cluster_indices.at(i).indices.size());
+  }
+  auto result = std::max_element(cluster_sizes.begin(), cluster_sizes.end());
+  int max_idx = std::distance(cluster_sizes.begin(), result);
+
+  cloud_extract->width = cluster_indices.at(max_idx).indices.size();
+  cloud_extract->height = 1;
+  cloud_extract->is_dense = true;
+
+  for (std::vector<int>::const_iterator pit = cluster_indices.at(max_idx).indices.begin (); pit != cluster_indices.at(max_idx).indices.end (); ++pit){
+    cloud_extract->points.push_back (input_cloud->points[*pit]);
+  }
+  return cloud_extract;
 }
 
 pcl::PointCloud<pcl::PointXYZRGB>::Ptr pointcloud_utils::createColorizedPointCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, int r, int g, int b){
