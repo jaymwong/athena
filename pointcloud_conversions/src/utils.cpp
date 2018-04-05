@@ -115,3 +115,35 @@ pcl::PointCloud<pcl::PointXYZRGB>::Ptr pointcloud_utils::createColorizedPointClo
   }
   return colored_cloud;
 }
+
+
+pcl::PointXYZ pointcloud_utils::eigenVectorToPclPointXYZ(Eigen::Vector3d vector){
+  pcl::PointXYZ result;
+  result.x = vector.x();
+  result.y = vector.y();
+  result.z = vector.z();
+  return result;
+}
+
+pcl::PointCloud<pcl::PointXYZ>::Ptr pointcloud_utils::doNeighborRadiusSearch(pcl::PointXYZ searchPoint, pcl::KdTreeFLANN<pcl::PointXYZ> kd_tree_flann,
+                                                                             pcl::PointCloud<pcl::PointXYZ>::Ptr raw_cloud, double radius)
+{
+  pcl::PointCloud<pcl::PointXYZ>::Ptr extracted_cloud = pcl::PointCloud<pcl::PointXYZ>::Ptr(new pcl::PointCloud<pcl::PointXYZ>);
+
+  std::vector<int> pointIdxRadiusSearch;
+  std::vector<float> pointRadiusSquaredDistance;
+
+  extracted_cloud->width = 0;
+  extracted_cloud->height = 1;
+  extracted_cloud->is_dense = true;
+
+  if (kd_tree_flann.radiusSearch (searchPoint, radius, pointIdxRadiusSearch, pointRadiusSquaredDistance) > 0 ){
+      extracted_cloud->width = pointIdxRadiusSearch.size();
+      extracted_cloud->points.clear();
+      for (size_t i = 0; i < pointIdxRadiusSearch.size(); i++){
+        extracted_cloud->points.push_back(raw_cloud->points[pointIdxRadiusSearch[i]]);
+      }
+   }
+   //std::cout << "Extracted cloud size: " << extracted_cloud->points.size()  << "\n";
+   return extracted_cloud;
+}
