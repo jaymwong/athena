@@ -48,6 +48,12 @@ Eigen::Vector3d transform_conversions::translation_from_matrix(Eigen::Matrix4d m
   return affine_matrix.translation();
 }
 
+Eigen::Vector3d transform_conversions::euler_from_matrix(Eigen::Matrix4d matrix){
+  auto euler = matrix.block<3,3>(0, 0).eulerAngles(2, 1, 0);
+  Eigen::Vector3d result(euler(2), euler(1), euler(0));
+  return result;
+}
+
 Eigen::Matrix4d transform_conversions::euler_matrix(double roll, double pitch, double yaw){
   tf::Transform transform;
   transform.setOrigin(tf::Vector3(0.0, 0.0, 0.0));

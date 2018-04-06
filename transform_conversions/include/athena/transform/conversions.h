@@ -32,6 +32,7 @@ namespace transform_conversions{
   void publish_matrix_as_tf(tf::TransformBroadcaster &br, Eigen::Affine3d transformation_matrix, std::string source, std::string dest);
 
   Eigen::Vector3d translation_from_matrix(Eigen::Matrix4d matrix);
+  Eigen::Vector3d euler_from_matrix(Eigen::Matrix4d matrix);
 
   Eigen::Matrix4d translation_matrix(double x, double y, double z);
   Eigen::Matrix4d euler_matrix(double roll, double pitch, double yaw);
