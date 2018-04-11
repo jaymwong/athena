@@ -15,6 +15,7 @@ find_package(Eigen3 REQUIRED)
 
 catkin_package(
 	INCLUDE_DIRS include
+	LIBRARIES visualization_conversions
 	CATKIN_DEPENDS roscpp message_generation
 	DEPENDS EIGEN3
 )
