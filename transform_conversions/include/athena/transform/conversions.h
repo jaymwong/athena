@@ -37,6 +37,9 @@ namespace transform_conversions{
   Eigen::Matrix4d translation_matrix(double x, double y, double z);
   Eigen::Matrix4d euler_matrix(double roll, double pitch, double yaw);
 
+  geometry_msgs::Point eigen3d_vector_to_point(Eigen::Vector3d vec);
+
+
   Eigen::Matrix4d array_to_eigen4d_matrix(const double transform[]);
   Eigen::Matrix4d array_to_eigen4d_matrix(const float transform[]);
 

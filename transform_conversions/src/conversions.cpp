@@ -66,6 +66,14 @@ Eigen::Matrix4d transform_conversions::euler_matrix(double roll, double pitch, d
   return tf_matrix.matrix();
 }
 
+geometry_msgs::Point transform_conversions::eigen3d_vector_to_point(Eigen::Vector3d vec){
+  geometry_msgs::Point result;
+  result.x = vec.x();
+  result.y = vec.y();
+  result.z = vec.z();
+  return result;
+}
+
 void transform_conversions::publish_matrix_as_tf(tf::TransformBroadcaster &br, Eigen::Matrix4d transformation_matrix, std::string source, std::string dest){
   Eigen::Affine3d *eigen_transform = new Eigen::Affine3d();
   eigen_transform->matrix() = transformation_matrix;
