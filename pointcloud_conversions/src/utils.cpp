@@ -24,6 +24,16 @@ Eigen::Vector3d pointcloud_utils::computePointCloudMedian(std::vector<double> cl
   return median;
 }
 
+Eigen::Vector3d pointcloud_utils::computePointCloudMedian(std::vector<Eigen::Vector3d> vec){
+  std::vector<double> x, y, z;
+  for (int i = 0; i < vec.size(); i++){
+    x.push_back(vec.at(i).x());
+    y.push_back(vec.at(i).y());
+    z.push_back(vec.at(i).z());
+  }
+  return computePointCloudMedian(x, y, z);
+}
+
 // Helper function to directly publish a point cloud under the publisher with desired frame_id
 void pointcloud_utils::publishPointCloudXYZ(ros::Publisher pub, pcl::PointCloud<pcl::PointXYZ> &pcl_cloud, std::string frame_id){
   pcl::PCLPointCloud2 pcl_pc2;

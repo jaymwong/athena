@@ -19,8 +19,7 @@
 
 namespace pointcloud_conversions{
 
-  void pointcloudToBGRImage(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &cloud,
-                         cv::Mat &coords, cv::Mat &image);
+  void pointcloudToBGRImage(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &cloud, cv::Mat &coords, cv::Mat &image);
 
 };
 
