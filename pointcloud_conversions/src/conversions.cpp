@@ -24,3 +24,12 @@ void pointcloud_conversions::pointcloudToBGRImage(const pcl::PointCloud<pcl::Poi
     }
   }
 }
+
+
+Eigen::Vector3d pointcloud_conversions::pclPointToEigenVector3d(pcl::PointXYZ pt){
+  Eigen::Vector3d vec;
+  vec.x() = pt.x;
+  vec.y() = pt.y;
+  vec.z() = pt.z;
+  return vec;
+}

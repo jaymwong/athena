@@ -14,6 +14,7 @@
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl/PCLPointCloud2.h>
 #include <sensor_msgs/PointCloud2.h>
+#include <geometry_msgs/Pose.h>
 
 #include <pcl/filters/voxel_grid.h>
 #include <pcl/point_cloud.h>
@@ -44,6 +45,7 @@ namespace pointcloud_utils{
   PointCloudProperties computePointCloudMinMax(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud);
 
   pcl::PointXYZ eigenVectorToPclPointXYZ(Eigen::Vector3d vector);
+  geometry_msgs::Pose pclPointXYZToGeometryMsgPose(pcl::PointXYZ pt);
 
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr createColorizedPointCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, int r, int g, int b);
 

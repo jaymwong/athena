@@ -20,6 +20,7 @@
 namespace pointcloud_conversions{
 
   void pointcloudToBGRImage(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &cloud, cv::Mat &coords, cv::Mat &image);
+  Eigen::Vector3d pclPointToEigenVector3d(pcl::PointXYZ pt);
 
 };
 

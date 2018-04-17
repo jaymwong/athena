@@ -157,3 +157,13 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr pointcloud_utils::doNeighborRadiusSearch(pcl
    //std::cout << "Extracted cloud size: " << extracted_cloud->points.size()  << "\n";
    return extracted_cloud;
 }
+
+
+geometry_msgs::Pose pointcloud_utils::pclPointXYZToGeometryMsgPose(pcl::PointXYZ pt){
+  geometry_msgs::Pose pose;
+  pose.position.x = pt.x;
+  pose.position.y = pt.y;
+  pose.position.z = pt.z;
+  pose.orientation.w = 1.0;
+  return pose;
+}
