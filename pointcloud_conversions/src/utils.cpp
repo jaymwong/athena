@@ -53,6 +53,15 @@ void pointcloud_utils::publishPointCloudXYZRGB(ros::Publisher pub, pcl::PointClo
   pub.publish(cloud_msg);
 }
 
+Eigen::Vector3d pointcloud_utils::computePointCloudBoundingBoxOrigin(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud){
+  PointCloudProperties props = computePointCloudMinMax(cloud);
+  Eigen::Vector3d result;
+  result.x() = (props.max_point.x - props.min_point.x)/2.0 +  props.min_point.x;
+  result.y() = (props.max_point.y - props.min_point.y)/2.0 +  props.min_point.y;
+  result.z() = (props.max_point.z - props.min_point.z)/2.0 +  props.min_point.z;
+  return result;
+}
+
 PointCloudProperties pointcloud_utils::computePointCloudMinMax(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud){
   PointCloudProperties results;
   pcl::PointXYZ minPoint, maxPoint;

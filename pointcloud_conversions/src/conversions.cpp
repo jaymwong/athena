@@ -33,3 +33,12 @@ Eigen::Vector3d pointcloud_conversions::pclPointToEigenVector3d(pcl::PointXYZ pt
   vec.z() = pt.z;
   return vec;
 }
+
+
+pcl::PointXYZ pointcloud_conversions::eigenVector3dToPclPoint(Eigen::Vector3d vec){
+  pcl::PointXYZ pt;
+  pt.x = vec.x();
+  pt.y = vec.y();
+  pt.z = vec.z();
+  return pt;
+}
