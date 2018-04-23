@@ -66,6 +66,23 @@ Eigen::Matrix4d transform_conversions::euler_matrix(double roll, double pitch, d
   return tf_matrix.matrix();
 }
 
+Eigen::Vector3d transform_conversions::quaternion_to_euler(Eigen::Quaterniond q){
+  Eigen::Vector3d euler = q.toRotationMatrix().eulerAngles(0, 1, 2);
+  return euler;
+}
+
+Eigen::Quaternionf transform_conversions::euler_to_quaternion(Eigen::Vector3d euler){
+  Eigen::Quaternionf q;
+  q = Eigen::AngleAxisf(euler(0), Eigen::Vector3f::UnitX())
+    * Eigen::AngleAxisf(euler(1), Eigen::Vector3f::UnitY())
+    * Eigen::AngleAxisf(euler(2), Eigen::Vector3f::UnitZ());
+  return q;
+}
+
+Eigen::Vector3d transform_conversions::euler_from_rotation(Eigen::Matrix3d rot){
+  return rot.eulerAngles(0, 1, 2);
+}
+
 geometry_msgs::Point transform_conversions::eigen3d_vector_to_point(Eigen::Vector3d vec){
   geometry_msgs::Point result;
   result.x = vec.x();

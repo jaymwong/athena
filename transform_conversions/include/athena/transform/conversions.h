@@ -34,6 +34,11 @@ namespace transform_conversions{
   Eigen::Vector3d translation_from_matrix(Eigen::Matrix4d matrix);
   Eigen::Vector3d euler_from_matrix(Eigen::Matrix4d matrix);
 
+  Eigen::Quaternionf euler_to_quaternion(Eigen::Vector3d euler);
+  Eigen::Vector3d quaternion_to_euler(Eigen::Quaterniond q);
+  Eigen::Vector3d euler_from_rotation(Eigen::Matrix3d rot);
+
+
   Eigen::Matrix4d translation_matrix(double x, double y, double z);
   Eigen::Matrix4d euler_matrix(double roll, double pitch, double yaw);
 
