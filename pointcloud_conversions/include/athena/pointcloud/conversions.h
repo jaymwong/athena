@@ -17,12 +17,14 @@
 #include <opencv2/highgui.hpp>
 
 
-namespace pointcloud_conversions{
+namespace athena{
+  namespace pointcloud_conversions{
 
-  void pointcloudToBGRImage(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &cloud, cv::Mat &coords, cv::Mat &image);
-  Eigen::Vector3d pclPointToEigenVector3d(pcl::PointXYZ pt);
-  pcl::PointXYZ eigenVector3dToPclPoint(Eigen::Vector3d vec);
+    void pointcloudToBGRImage(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &cloud, cv::Mat &coords, cv::Mat &image);
+    Eigen::Vector3d pclPointToEigenVector3d(pcl::PointXYZ pt);
+    pcl::PointXYZ eigenVector3dToPclPoint(Eigen::Vector3d vec);
 
+  };
 };
 
 #endif

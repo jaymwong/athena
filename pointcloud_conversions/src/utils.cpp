@@ -1,7 +1,7 @@
 #include "athena/pointcloud/utils.h"
 
 // Computes the median of a point cloud
-Eigen::Vector3d pointcloud_utils::computePointCloudMedian(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud){
+Eigen::Vector3d athena::pointcloud_utils::computePointCloudMedian(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud){
   std::vector<double> cloud_x, cloud_y, cloud_z;
   for (int i = 0; i < cloud->points.size(); i++){
     pcl::PointXYZ pt = cloud->points[i];
@@ -12,7 +12,7 @@ Eigen::Vector3d pointcloud_utils::computePointCloudMedian(pcl::PointCloud<pcl::P
   return computePointCloudMedian(cloud_x, cloud_y, cloud_z);
 }
 
-Eigen::Vector3d pointcloud_utils::computePointCloudMedian(std::vector<double> cluster_pt_x, std::vector<double> cluster_pt_y, std::vector<double> cluster_pt_z){
+Eigen::Vector3d athena::pointcloud_utils::computePointCloudMedian(std::vector<double> cluster_pt_x, std::vector<double> cluster_pt_y, std::vector<double> cluster_pt_z){
   Eigen::Vector3d median;
   sort(cluster_pt_x.begin(), cluster_pt_x.end());
   sort(cluster_pt_y.begin(), cluster_pt_y.end());
@@ -24,7 +24,7 @@ Eigen::Vector3d pointcloud_utils::computePointCloudMedian(std::vector<double> cl
   return median;
 }
 
-Eigen::Vector3d pointcloud_utils::computePointCloudMedian(std::vector<Eigen::Vector3d> vec){
+Eigen::Vector3d athena::pointcloud_utils::computePointCloudMedian(std::vector<Eigen::Vector3d> vec){
   std::vector<double> x, y, z;
   for (int i = 0; i < vec.size(); i++){
     x.push_back(vec.at(i).x());
@@ -35,7 +35,7 @@ Eigen::Vector3d pointcloud_utils::computePointCloudMedian(std::vector<Eigen::Vec
 }
 
 // Helper function to directly publish a point cloud under the publisher with desired frame_id
-void pointcloud_utils::publishPointCloudXYZ(ros::Publisher pub, pcl::PointCloud<pcl::PointXYZ> &pcl_cloud, std::string frame_id){
+void athena::pointcloud_utils::publishPointCloudXYZ(ros::Publisher pub, pcl::PointCloud<pcl::PointXYZ> &pcl_cloud, std::string frame_id){
   pcl::PCLPointCloud2 pcl_pc2;
   pcl::toPCLPointCloud2(pcl_cloud, pcl_pc2);
   sensor_msgs::PointCloud2 cloud_msg;
@@ -44,7 +44,7 @@ void pointcloud_utils::publishPointCloudXYZ(ros::Publisher pub, pcl::PointCloud<
   pub.publish(cloud_msg);
 }
 
-void pointcloud_utils::publishPointCloudXYZRGB(ros::Publisher pub, pcl::PointCloud<pcl::PointXYZRGB> &pcl_cloud, std::string frame_id){
+void athena::pointcloud_utils::publishPointCloudXYZRGB(ros::Publisher pub, pcl::PointCloud<pcl::PointXYZRGB> &pcl_cloud, std::string frame_id){
   pcl::PCLPointCloud2 pcl_pc2;
   pcl::toPCLPointCloud2(pcl_cloud, pcl_pc2);
   sensor_msgs::PointCloud2 cloud_msg;
@@ -53,7 +53,7 @@ void pointcloud_utils::publishPointCloudXYZRGB(ros::Publisher pub, pcl::PointClo
   pub.publish(cloud_msg);
 }
 
-Eigen::Vector3d pointcloud_utils::computePointCloudBoundingBoxOrigin(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud){
+Eigen::Vector3d athena::pointcloud_utils::computePointCloudBoundingBoxOrigin(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud){
   PointCloudProperties props = computePointCloudMinMax(cloud);
   Eigen::Vector3d result;
   result.x() = (props.max_point.x - props.min_point.x)/2.0 +  props.min_point.x;
@@ -62,7 +62,7 @@ Eigen::Vector3d pointcloud_utils::computePointCloudBoundingBoxOrigin(pcl::PointC
   return result;
 }
 
-PointCloudProperties pointcloud_utils::computePointCloudMinMax(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud){
+PointCloudProperties athena::pointcloud_utils::computePointCloudMinMax(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud){
   PointCloudProperties results;
   pcl::PointXYZ minPoint, maxPoint;
   pcl::getMinMax3D(*cloud, minPoint, maxPoint);
@@ -74,7 +74,7 @@ PointCloudProperties pointcloud_utils::computePointCloudMinMax(pcl::PointCloud<p
   return results;
 }
 
-pcl::PointCloud<pcl::PointXYZ>::Ptr pointcloud_utils::getStatisticsPoints(pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud, double thresh){
+pcl::PointCloud<pcl::PointXYZ>::Ptr athena::pointcloud_utils::getStatisticsPoints(pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud, double thresh){
   pcl::PointCloud<pcl::PointXYZ>::Ptr out_cloud = pcl::PointCloud<pcl::PointXYZ>::Ptr(new pcl::PointCloud<pcl::PointXYZ>);
   pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sor;
   sor.setInputCloud (input_cloud);
@@ -85,7 +85,7 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr pointcloud_utils::getStatisticsPoints(pcl::P
 }
 
 
-pcl::PointCloud<pcl::PointXYZ>::Ptr pointcloud_utils::getMaxEuclideanClusterFromPointCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud, double tolerance){
+pcl::PointCloud<pcl::PointXYZ>::Ptr athena::pointcloud_utils::getMaxEuclideanClusterFromPointCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud, double tolerance){
   // Creating the KdTree object for the search method of the extraction
   pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ>);
   pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_extract = pcl::PointCloud<pcl::PointXYZ>::Ptr(new pcl::PointCloud<pcl::PointXYZ>);
@@ -119,7 +119,7 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr pointcloud_utils::getMaxEuclideanClusterFrom
   return cloud_extract;
 }
 
-pcl::PointCloud<pcl::PointXYZRGB>::Ptr pointcloud_utils::createColorizedPointCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, int r, int g, int b){
+pcl::PointCloud<pcl::PointXYZRGB>::Ptr athena::pointcloud_utils::createColorizedPointCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, int r, int g, int b){
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr colored_cloud;
   colored_cloud = (new pcl::PointCloud<pcl::PointXYZRGB>)->makeShared();
 
@@ -147,7 +147,7 @@ pcl::PointCloud<pcl::PointXYZRGB>::Ptr pointcloud_utils::createColorizedPointClo
 }
 
 
-pcl::PointXYZ pointcloud_utils::eigenVectorToPclPointXYZ(Eigen::Vector3d vector){
+pcl::PointXYZ athena::pointcloud_utils::eigenVectorToPclPointXYZ(Eigen::Vector3d vector){
   pcl::PointXYZ result;
   result.x = vector.x();
   result.y = vector.y();
@@ -155,7 +155,7 @@ pcl::PointXYZ pointcloud_utils::eigenVectorToPclPointXYZ(Eigen::Vector3d vector)
   return result;
 }
 
-pcl::PointCloud<pcl::PointXYZ>::Ptr pointcloud_utils::doNeighborRadiusSearch(pcl::PointXYZ searchPoint, pcl::KdTreeFLANN<pcl::PointXYZ> kd_tree_flann,
+pcl::PointCloud<pcl::PointXYZ>::Ptr athena::pointcloud_utils::doNeighborRadiusSearch(pcl::PointXYZ searchPoint, pcl::KdTreeFLANN<pcl::PointXYZ> kd_tree_flann,
                                                                              pcl::PointCloud<pcl::PointXYZ>::Ptr raw_cloud, double radius)
 {
   pcl::PointCloud<pcl::PointXYZ>::Ptr extracted_cloud = pcl::PointCloud<pcl::PointXYZ>::Ptr(new pcl::PointCloud<pcl::PointXYZ>);
@@ -179,7 +179,7 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr pointcloud_utils::doNeighborRadiusSearch(pcl
 }
 
 
-geometry_msgs::Pose pointcloud_utils::pclPointXYZToGeometryMsgPose(pcl::PointXYZ pt){
+geometry_msgs::Pose athena::pointcloud_utils::pclPointXYZToGeometryMsgPose(pcl::PointXYZ pt){
   geometry_msgs::Pose pose;
   pose.position.x = pt.x;
   pose.position.y = pt.y;
