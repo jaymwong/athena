@@ -7,6 +7,7 @@ find_package(catkin REQUIRED
 	COMPONENTS
 		geometry_msgs
   	tf_conversions
+		eigen_conversions
 		message_generation
 )
 

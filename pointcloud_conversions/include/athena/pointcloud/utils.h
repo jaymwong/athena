@@ -23,10 +23,12 @@
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_types.h>
 #include <pcl/filters/passthrough.h>
+#include <pcl/filters/statistical_outlier_removal.h>
 #include <pcl/registration/icp.h>
 
 #include <pcl/segmentation/sac_segmentation.h>
 #include <pcl/segmentation/extract_clusters.h>
+#include <pcl/filters/statistical_outlier_removal.h>
 
 
 struct PointCloudProperties{
@@ -53,6 +55,8 @@ namespace pointcloud_utils{
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr createColorizedPointCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, int r, int g, int b);
 
   pcl::PointCloud<pcl::PointXYZ>::Ptr getMaxEuclideanClusterFromPointCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud, double tolerance);
+  pcl::PointCloud<pcl::PointXYZ>::Ptr getStatisticsPoints(pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud, double thresh);
+
 
   pcl::PointCloud<pcl::PointXYZ>::Ptr doNeighborRadiusSearch(pcl::PointXYZ searchPoint, pcl::KdTreeFLANN<pcl::PointXYZ> kd_tree_flann,
                                                              pcl::PointCloud<pcl::PointXYZ>::Ptr raw_cloud, double radius);

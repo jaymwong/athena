@@ -74,6 +74,17 @@ PointCloudProperties pointcloud_utils::computePointCloudMinMax(pcl::PointCloud<p
   return results;
 }
 
+pcl::PointCloud<pcl::PointXYZ>::Ptr pointcloud_utils::getStatisticsPoints(pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud, double thresh){
+  pcl::PointCloud<pcl::PointXYZ>::Ptr out_cloud = pcl::PointCloud<pcl::PointXYZ>::Ptr(new pcl::PointCloud<pcl::PointXYZ>);
+  pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sor;
+  sor.setInputCloud (input_cloud);
+  sor.setMeanK (50);
+  sor.setStddevMulThresh (thresh);
+  sor.filter (*out_cloud);
+  return out_cloud;
+}
+
+
 pcl::PointCloud<pcl::PointXYZ>::Ptr pointcloud_utils::getMaxEuclideanClusterFromPointCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud, double tolerance){
   // Creating the KdTree object for the search method of the extraction
   pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ>);
