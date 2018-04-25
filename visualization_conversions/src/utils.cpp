@@ -1,6 +1,6 @@
 #include "athena/visualization/utils.h"
 
-visualization_msgs::Marker visualization_utils::createMarkerFromPoint(Eigen::Vector3d point, int id, std::string frame, double size){
+visualization_msgs::Marker athena::visualization_utils::createMarkerFromPoint(Eigen::Vector3d point, int id, std::string frame, double size){
   visualization_msgs::Marker marker;
   marker.header.frame_id = frame;
   marker.ns = std::to_string(id);
@@ -25,7 +25,7 @@ visualization_msgs::Marker visualization_utils::createMarkerFromPoint(Eigen::Vec
 }
 
 
-visualization_msgs::MarkerArray visualization_utils::createMarkersFromPoints(std::vector<Eigen::Vector3d> points, std::string frame, double size){
+visualization_msgs::MarkerArray athena::visualization_utils::createMarkersFromPoints(std::vector<Eigen::Vector3d> points, std::string frame, double size){
   visualization_msgs::MarkerArray marker_array;
   for (int i = 0; i < points.size(); i++){
     marker_array.markers.push_back(createMarkerFromPoint(points.at(i), i, frame, size));
@@ -33,7 +33,7 @@ visualization_msgs::MarkerArray visualization_utils::createMarkersFromPoints(std
   return marker_array;
 }
 
-visualization_msgs::Marker visualization_utils::createBoundingBoxMarker(int id, Eigen::Vector3f point, Eigen::Quaternionf quat, Eigen::Vector3f size, std::string frame){
+visualization_msgs::Marker athena::visualization_utils::createBoundingBoxMarker(int id, Eigen::Vector3f point, Eigen::Quaternionf quat, Eigen::Vector3f size, std::string frame){
   visualization_msgs::Marker marker;
   marker.header.frame_id = frame;
   marker.ns = std::to_string(id);
