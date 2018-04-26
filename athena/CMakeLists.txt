@@ -5,15 +5,15 @@ add_compile_options(-std=c++11)
 
 find_package(catkin REQUIRED
 	COMPONENTS
-		transform_conversions
-  	visualization_conversions
-		pointcloud_conversions
+		athena_transform
+  	athena_pointcloud
+		athena_visualization
 )
 
 catkin_package(
 	INCLUDE_DIRS include
 #	LIBRARIES athena
-	CATKIN_DEPENDS roscpp message_generation transform_conversions visualization_conversions pointcloud_conversions
+	CATKIN_DEPENDS roscpp message_generation athena_transform athena_pointcloud athena_visualization
 	DEPENDS EIGEN3
 )
 

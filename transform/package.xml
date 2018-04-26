@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>athena</name>
+  <name>athena_transform</name>
   <version>0.0.0</version>
-  <description>The athena package</description>
+  <description>The athena_transform package</description>
 
   <maintainer email="jmwong@csail.mit.edu">Jay M. Wong</maintainer>
 
@@ -12,9 +12,11 @@
   <buildtool_depend>catkin</buildtool_depend>
   <depend>roscpp</depend>
   <depend>rospy</depend>
-  <depend>athena_transform</depend>
-  <depend>athena_pointcloud</depend>
-  <depend>athena_visualization</depend>
+  <depend>std_msgs</depend>
+  <depend>cmake_modules</depend>
+  <depend>tf</depend>
+  <depend>tf_conversions</depend>
+  <depend>eigen_conversions</depend>
   <depend>message_generation</depend>
   <export>
 
