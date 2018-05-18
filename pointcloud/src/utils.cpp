@@ -34,6 +34,22 @@ Eigen::Vector3d athena::pointcloud::computePointCloudMedian(std::vector<Eigen::V
   return computePointCloudMedian(x, y, z);
 }
 
+sensor_msgs::PointCloud2 athena::pointcloud::toSensorMsgPointCloud2(pcl::PointCloud<pcl::PointXYZ> pcl_cloud){
+  pcl::PCLPointCloud2 pcl_pc2;
+  pcl::toPCLPointCloud2(pcl_cloud, pcl_pc2);
+  sensor_msgs::PointCloud2 cloud_msg;
+  pcl_conversions::fromPCL(pcl_pc2, cloud_msg);
+  return cloud_msg;
+}
+
+sensor_msgs::PointCloud2 athena::pointcloud::toSensorMsgPointCloud2(pcl::PointCloud<pcl::PointXYZRGBA> pcl_cloud){
+  pcl::PCLPointCloud2 pcl_pc2;
+  pcl::toPCLPointCloud2(pcl_cloud, pcl_pc2);
+  sensor_msgs::PointCloud2 cloud_msg;
+  pcl_conversions::fromPCL(pcl_pc2, cloud_msg);
+  return cloud_msg;
+}
+
 // Helper function to directly publish a point cloud under the publisher with desired frame_id
 void athena::pointcloud::publishPointCloudXYZ(ros::Publisher pub, pcl::PointCloud<pcl::PointXYZ> &pcl_cloud, std::string frame_id){
   pcl::PCLPointCloud2 pcl_pc2;
@@ -153,6 +169,15 @@ pcl::PointXYZ athena::pointcloud::eigenVectorToPclPointXYZ(Eigen::Vector3d vecto
   result.y = vector.y();
   result.z = vector.z();
   return result;
+}
+
+ pcl::PointCloud<pcl::PointXYZ>::Ptr athena::pointcloud::sensorMsgToPclPointCloudXYZ(const sensor_msgs::PointCloud2ConstPtr& input){
+  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = pcl::PointCloud<pcl::PointXYZ>::Ptr(new pcl::PointCloud<pcl::PointXYZ>);
+  pcl::PCLPointCloud2* input_cloud_pcl = new pcl::PCLPointCloud2;
+  pcl::PCLPointCloud2ConstPtr cloudPtr(input_cloud_pcl);
+  pcl_conversions::toPCL(*input, *input_cloud_pcl);
+  pcl::fromPCLPointCloud2(*input_cloud_pcl, *cloud);
+  return cloud;
 }
 
 pcl::PointCloud<pcl::PointXYZ>::Ptr athena::pointcloud::doNeighborRadiusSearch(pcl::PointXYZ searchPoint, pcl::KdTreeFLANN<pcl::PointXYZ> kd_tree_flann,

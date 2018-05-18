@@ -47,6 +47,9 @@ namespace athena {
 
     Eigen::Vector3d computePointCloudBoundingBoxOrigin(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud);
 
+    sensor_msgs::PointCloud2 toSensorMsgPointCloud2(pcl::PointCloud<pcl::PointXYZ> pcl_cloud);
+    sensor_msgs::PointCloud2 toSensorMsgPointCloud2(pcl::PointCloud<pcl::PointXYZRGBA> pcl_cloud);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr sensorMsgToPclPointCloudXYZ(const sensor_msgs::PointCloud2ConstPtr& input);
 
     void publishPointCloudXYZ(ros::Publisher pub, pcl::PointCloud<pcl::PointXYZ> &pcl_cloud, std::string frame_id);
     void publishPointCloudXYZRGB(ros::Publisher pub, pcl::PointCloud<pcl::PointXYZRGB> &pcl_cloud, std::string frame_id);
