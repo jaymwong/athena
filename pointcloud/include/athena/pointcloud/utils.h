@@ -33,6 +33,9 @@
 #include <pcl/segmentation/extract_clusters.h>
 #include <pcl/filters/statistical_outlier_removal.h>
 
+#include <athena_pointcloud/CloudGeometries.h>
+
+#define kInfinity 9999999
 
 struct PointCloudProperties{
   pcl::PointXYZ min_point, max_point;
@@ -41,11 +44,51 @@ struct PointCloudProperties{
 namespace athena {
   namespace pointcloud{
 
+    // A class with data structures for the object geometries
+    class ObjectGeometries{
+      public:
+        std::string obj_name;
+        double min_x, max_x, min_y, max_y, min_z, max_z;
+
+        ObjectGeometries(std::string n, double mix, double max, double miy, double may, double miz, double maz){
+          obj_name = n;
+          min_x = mix;
+          max_x = max;
+          min_y = miy;
+          max_y = may;
+          min_z = miz;
+          max_z = maz;
+        };
+        ~ObjectGeometries(){};
+
+        void printGeometries(){
+          std::cout << obj_name << ":\n     x:" << min_x << " " << max_x << "\n     y:" << min_y << " " << max_y << "\n     z:" << min_z << " " << max_z << "\n";
+        }
+
+        athena_pointcloud::CloudGeometry toCloudGeometryMsg(){
+          athena_pointcloud::CloudGeometry geometry;
+          geometry.id = obj_name;
+          geometry.x[0] = min_x;
+          geometry.x[1] = max_x;
+          geometry.y[0] = min_y;
+          geometry.y[1] = max_y;
+          geometry.z[0] = min_z;
+          geometry.z[1] = max_z;
+          return geometry;
+        }
+    };
+
+
     Eigen::Vector3d computePointCloudMedian(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud);
     Eigen::Vector3d computePointCloudMedian(std::vector<double> cluster_pt_x, std::vector<double> cluster_pt_y, std::vector<double> cluster_pt_z);
     Eigen::Vector3d computePointCloudMedian(std::vector<Eigen::Vector3d> vec);
 
     Eigen::Vector3d computePointCloudBoundingBoxOrigin(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud);
+
+    std::vector<double> getMinAndMaxFromVector(std::vector<double> my_vector);
+
+    // Computes the geometry (e.g. min and max displacements aloong the world coordinate frame) for a point cloud
+    athena::pointcloud::ObjectGeometries* computePointCloudGeometries(std::string obj_name, pcl::PointCloud<pcl::PointXYZ> cloud);
 
     sensor_msgs::PointCloud2 toSensorMsgPointCloud2(pcl::PointCloud<pcl::PointXYZ> pcl_cloud);
     sensor_msgs::PointCloud2 toSensorMsgPointCloud2(pcl::PointCloud<pcl::PointXYZRGBA> pcl_cloud);

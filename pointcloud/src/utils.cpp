@@ -34,6 +34,37 @@ Eigen::Vector3d athena::pointcloud::computePointCloudMedian(std::vector<Eigen::V
   return computePointCloudMedian(x, y, z);
 }
 
+std::vector<double> athena::pointcloud::getMinAndMaxFromVector(std::vector<double> my_vector){
+  std::vector<double> min_max;
+  int min_idx = std::min_element(my_vector.begin(), my_vector.end()) - my_vector.begin();
+  int max_idx = std::max_element(my_vector.begin(), my_vector.end()) - my_vector.begin();
+
+  min_max.push_back(my_vector.at(min_idx));
+  min_max.push_back(my_vector.at(max_idx));
+  return min_max;
+}
+
+// Computes the geometry (e.g. min and max displacements aloong the world coordinate frame) for a point cloud
+athena::pointcloud::ObjectGeometries* athena::pointcloud::computePointCloudGeometries(std::string obj_name, pcl::PointCloud<pcl::PointXYZ> cloud){
+  double min_x = kInfinity;
+  double max_x = -kInfinity;
+  double min_y = kInfinity;
+  double max_y = -kInfinity;
+  double min_z = kInfinity;
+  double max_z = -kInfinity;
+  for (int i = 0; i < cloud.size(); i++){
+    pcl::PointXYZ cloud_point = cloud.at(i);
+    if (cloud_point.x > max_x){ max_x = cloud_point.x; }
+    if (cloud_point.x < min_x){ min_x = cloud_point.x; }
+    if (cloud_point.y > max_y){ max_y = cloud_point.y; }
+    if (cloud_point.y < min_y){ min_y = cloud_point.y; }
+    if (cloud_point.z > max_z){ max_z = cloud_point.z; }
+    if (cloud_point.z < min_z){ min_z = cloud_point.z; }
+  }
+  athena::pointcloud::ObjectGeometries *obj_geometry = new athena::pointcloud::ObjectGeometries(obj_name, min_x, max_x, min_y, max_y, min_z, max_z);
+  return obj_geometry;
+}
+
 sensor_msgs::PointCloud2 athena::pointcloud::toSensorMsgPointCloud2(pcl::PointCloud<pcl::PointXYZ> pcl_cloud){
   pcl::PCLPointCloud2 pcl_pc2;
   pcl::toPCLPointCloud2(pcl_cloud, pcl_pc2);
