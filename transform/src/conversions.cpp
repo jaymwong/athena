@@ -92,10 +92,10 @@ geometry_msgs::Point athena::transform::eigen3d_vector_to_point(Eigen::Vector3d 
 }
 
 void athena::transform::publish_matrix_as_tf(tf::TransformBroadcaster &br, Eigen::Matrix4d transformation_matrix, std::string source, std::string dest){
-  Eigen::Affine3d *eigen_transform = new Eigen::Affine3d();
-  eigen_transform->matrix() = transformation_matrix;
+  Eigen::Affine3d affine;
+  affine.matrix() = transformation_matrix;
   tf::Transform t;
-  tf::transformEigenToTF(*eigen_transform, t);
+  tf::transformEigenToTF(affine, t);
   auto q = t.getRotation().normalize();
   t.setRotation(q);
   br.sendTransform(tf::StampedTransform(t, ros::Time::now(), source, dest));
