@@ -41,7 +41,6 @@ Eigen::Matrix4d athena::transform::translation_matrix(double x, double y, double
   return matrix;
 }
 
-
 Eigen::Vector3d athena::transform::translation_from_matrix(Eigen::Matrix4d matrix){
   Eigen::Affine3d affine_matrix;
   affine_matrix.matrix() = matrix;
@@ -70,6 +69,15 @@ Eigen::Matrix4d athena::transform::xyzrpy_to_matrix(Eigen::Vector3d xyz, Eigen::
   Eigen::Affine3d affine;
   affine.matrix() = athena::transform::euler_matrix(rpy(0), rpy(1), rpy(2));
   affine.translation() = xyz;
+  return affine.matrix();
+}
+
+Eigen::Matrix4d athena::transform::xyzrpy_to_matrix(std::vector<double> xyzrpy) {
+  Eigen::Affine3d affine;
+  affine.matrix() = athena::transform::euler_matrix(xyzrpy[3], xyzrpy[4], xyzrpy[5]);
+  affine.translation().x() = xyzrpy[0];
+  affine.translation().y() = xyzrpy[1];
+  affine.translation().z() = xyzrpy[2];
   return affine.matrix();
 }
 
@@ -163,4 +171,68 @@ boost::array<double, HOMOGENOUS_TRANFORM_ELEMENTS> athena::transform::eigen4d_ma
     transform_array[i] = resize_transform(0, i);
   }
   return transform_array;
+}
+
+Matrix4dStatistics athena::transform::compute_transform_statistics(std::vector<Eigen::Matrix4d> transforms) {
+  std::vector<double> x, y, z, r, p, yw;
+  Matrix4dStatistics transform_statistics;
+  for (int i = 0; i < transforms.size(); i++) {
+    auto xyz = athena::transform::translation_from_matrix(transforms[i]);
+    auto rpy = athena::transform::euler_from_matrix(transforms[i]);
+    x.push_back(xyz[0]);
+    y.push_back(xyz[1]);
+    z.push_back(xyz[2]);
+    r.push_back(rpy[0]);
+    p.push_back(rpy[1]);
+    yw.push_back(rpy[2]);
+  }
+  std::sort (x.begin(), x.end());
+  std::sort (y.begin(), y.end());
+  std::sort (z.begin(), z.end());
+  std::sort (r.begin(), r.end());
+  std::sort (p.begin(), p.end());
+  std::sort (yw.begin(), yw.end());
+  transform_statistics.mean.push_back(findmean(x));
+  transform_statistics.mean.push_back(findmean(y));
+  transform_statistics.mean.push_back(findmean(z));
+  transform_statistics.mean.push_back(findmean(r));
+  transform_statistics.mean.push_back(findmean(p));
+  transform_statistics.mean.push_back(findmean(yw));
+  transform_statistics.median.push_back(findmedian(x));
+  transform_statistics.median.push_back(findmedian(y));
+  transform_statistics.median.push_back(findmedian(z));
+  transform_statistics.median.push_back(findmedian(r));
+  transform_statistics.median.push_back(findmedian(p));
+  transform_statistics.median.push_back(findmedian(yw));
+  transform_statistics.std.push_back(findstd(x, transform_statistics.mean[0]));
+  transform_statistics.std.push_back(findstd(y, transform_statistics.mean[1]));
+  transform_statistics.std.push_back(findstd(z, transform_statistics.mean[2]));
+  transform_statistics.std.push_back(findstd(r, transform_statistics.mean[3]));
+  transform_statistics.std.push_back(findstd(p, transform_statistics.mean[4]));
+  transform_statistics.std.push_back(findstd(yw, transform_statistics.mean[5]));
+  return transform_statistics;
+}
+
+double athena::transform::findmean(std::vector<double> val) {
+  double sum = 0;
+  for (int i = 0; i < val.size(); i++) {
+    sum += val[i];
+  }
+  return double(sum/val.size());
+}
+
+double athena::transform::findmedian(std::vector<double> val) {
+  if(val.size()%2 == 0)
+    return double((val[val.size()/2] + val[(val.size()/2) - 1]) / 2);
+  else if(val.size()%2 == 0)
+    return double(val[(val.size()/2)]);
+}
+
+double athena::transform::findstd(std::vector<double> val, double mean) {
+  std::vector<double> diff;
+  std::cout << val[val.size() - 1] - val[0] << std::endl;
+  for (int i = 0; i < val.size(); i++) {
+    diff.push_back(val[i] - mean);
+  }
+  return findmean(diff);
 }

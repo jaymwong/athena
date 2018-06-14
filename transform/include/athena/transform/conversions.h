@@ -16,15 +16,17 @@
 #include <tf_conversions/tf_eigen.h>
 #include <Eigen/Core>
 
-
 #define HOMOGENOUS_TRANFORM_ELEMENTS 16
+
+struct Matrix4dStatistics {
+  std::vector<double> mean, median, std;
+};
 
 namespace athena{
   namespace transform{
 
     // Various conversions
     tf::Transform pose_stamped_msg_to_tf(geometry_msgs::PoseStamped pose);
-
 
     // Various ways to transform poses or points
     geometry_msgs::PointStamped transform_point(tf2_ros::Buffer &tf_buffer, geometry_msgs::PointStamped point, std::string target_frame);
@@ -42,17 +44,21 @@ namespace athena{
     Eigen::Vector3d euler_from_rotation(Eigen::Matrix3d rot);
 
     Eigen::Matrix4d xyzrpy_to_matrix(Eigen::Vector3d xyz, Eigen::Vector3d rpy);
+    Eigen::Matrix4d xyzrpy_to_matrix(std::vector<double> xyzrpy);
     Eigen::Matrix4d translation_matrix(double x, double y, double z);
     Eigen::Matrix4d euler_matrix(double roll, double pitch, double yaw);
 
     geometry_msgs::Point eigen3d_vector_to_point(Eigen::Vector3d vec);
-
 
     Eigen::Matrix4d array_to_eigen4d_matrix(const double transform[]);
     Eigen::Matrix4d array_to_eigen4d_matrix(const float transform[]);
 
     boost::array<double, HOMOGENOUS_TRANFORM_ELEMENTS> eigen4d_matrix_to_array(Eigen::Matrix4d transform);
 
+    Matrix4dStatistics compute_transform_statistics(std::vector<Eigen::Matrix4d> transforms);
+    double findmean(std::vector<double> val);
+    double findmedian(std::vector<double> val);
+    double findstd(std::vector<double> val, double mean);
   };
 };
 
