@@ -82,7 +82,7 @@ Eigen::Matrix4d athena::transform::xyzrpy_to_matrix(std::vector<double> xyzrpy) 
 }
 
 Eigen::VectorXd athena::transform::xyzrpy_from_matrix(Eigen::Matrix4d matrix){
-  Eigen::VectorXd xyzrpy;
+  Eigen::VectorXd xyzrpy(6);
   auto xyz = athena::transform::translation_from_matrix(matrix);
   auto rpy = athena::transform::euler_from_matrix(matrix);
   xyzrpy << xyz, rpy;
