@@ -66,6 +66,21 @@ Eigen::Matrix4d athena::transform::euler_matrix(double roll, double pitch, doubl
   return tf_matrix.matrix();
 }
 
+Eigen::Matrix4d athena::transform::xyzrpy_to_matrix(Eigen::Vector3d xyz, Eigen::Vector3d rpy){
+  Eigen::Affine3d affine;
+  affine.matrix() = athena::transform::euler_matrix(rpy(0), rpy(1), rpy(2));
+  affine.translation() = xyz;
+  return affine.matrix();
+}
+
+Eigen::VectorXd athena::transform::xyzrpy_from_matrix(Eigen::Matrix4d matrix){
+  Eigen::VectorXd xyzrpy;
+  auto xyz = athena::transform::translation_from_matrix(matrix);
+  auto rpy = athena::transform::euler_from_matrix(matrix);
+  xyzrpy << xyz, rpy;
+  return xyzrpy;
+}
+
 Eigen::Vector3d athena::transform::quaternion_to_euler(Eigen::Quaterniond q){
   Eigen::Vector3d euler = q.toRotationMatrix().eulerAngles(0, 1, 2);
   return euler;
