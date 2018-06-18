@@ -215,6 +215,8 @@ def identity_matrix():
     """
     return numpy.identity(4)
 
+def xyzrpy_to_matrix(x, y, z, r, p, yaw):
+    return numpy.dot(translation_matrix([x, y, z]), euler_matrix(r, p, yaw))
 
 def translation_matrix(direction):
     """Return matrix to translate by direction vector.
@@ -1887,7 +1889,7 @@ def is_same_quaternion(q0, q1):
     return numpy.allclose(q0, q1) or numpy.allclose(q0, -q1)
 
 
-def _import_module(name, package=None, warn=True, prefix='_py_', ignore='_'):
+def _import_module(name, package=None, warn=False, prefix='_py_', ignore='_'):
     """Try import all public attributes from module into global namespace.
 
     Existing attributes with name clashes are renamed with prefix.
