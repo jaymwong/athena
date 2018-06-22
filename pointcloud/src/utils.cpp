@@ -131,6 +131,24 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr athena::pointcloud::getCloudPointsWithinStdD
   return out_cloud;
 }
 
+pcl::PointCloud<pcl::PointXYZ>::Ptr athena::pointcloud::doPassThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, std::string axis, double min, double max){
+  pcl::PointCloud<pcl::PointXYZ>::Ptr out_cloud (new pcl::PointCloud<pcl::PointXYZ>);
+  pcl::PassThrough<pcl::PointXYZ> pass;
+  pass.setInputCloud(cloud);
+  pass.setFilterFieldName(axis);
+  pass.setFilterLimits(min, max);
+  pass.filter(*out_cloud);
+  return out_cloud;
+}
+
+pcl::PointCloud<pcl::PointXYZ>::Ptr athena::pointcloud::doPassThroughCubeCrop(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, pcl::PointXYZ pt, double radius){
+  pcl::PointCloud<pcl::PointXYZ>::Ptr out_cloud (new pcl::PointCloud<pcl::PointXYZ>);
+  out_cloud = athena::pointcloud::doPassThroughFilter(cloud, "x", pt.x-radius, pt.x+radius);
+  out_cloud = athena::pointcloud::doPassThroughFilter(out_cloud, "y", pt.y-radius, pt.y+radius);
+  out_cloud = athena::pointcloud::doPassThroughFilter(out_cloud, "z", pt.z-radius, pt.z+radius);
+  return out_cloud;
+}
+
 
 pcl::PointCloud<pcl::PointXYZ>::Ptr athena::pointcloud::getMaxEuclideanClusterFromPointCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud, double tolerance){
   // Creating the KdTree object for the search method of the extraction

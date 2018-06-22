@@ -94,6 +94,7 @@ namespace athena {
     sensor_msgs::PointCloud2 toSensorMsgPointCloud2(pcl::PointCloud<pcl::PointXYZRGBA> pcl_cloud);
     pcl::PointCloud<pcl::PointXYZ>::Ptr sensorMsgToPclPointCloudXYZ(const sensor_msgs::PointCloud2ConstPtr& input);
 
+
     void publishPointCloudXYZ(ros::Publisher pub, pcl::PointCloud<pcl::PointXYZ> &pcl_cloud, std::string frame_id);
     void publishPointCloudXYZRGB(ros::Publisher pub, pcl::PointCloud<pcl::PointXYZRGB> &pcl_cloud, std::string frame_id);
 
@@ -101,6 +102,10 @@ namespace athena {
 
     pcl::PointXYZ eigenVectorToPclPointXYZ(Eigen::Vector3d vector);
     geometry_msgs::Pose pclPointXYZToGeometryMsgPose(pcl::PointXYZ pt);
+
+    pcl::PointCloud<pcl::PointXYZ>::Ptr doPassThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, std::string axis, double min, double max);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr doPassThroughCubeCrop(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, pcl::PointXYZ pt, double radius);
+
 
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr createColorizedPointCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, int r, int g, int b);
 
