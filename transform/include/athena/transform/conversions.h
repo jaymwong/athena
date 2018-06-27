@@ -53,6 +53,9 @@ namespace athena{
     Eigen::Matrix4d array_to_eigen4d_matrix(const double transform[]);
     Eigen::Matrix4d array_to_eigen4d_matrix(const float transform[]);
 
+    Eigen::Vector3d compute_midpoint(Eigen::Vector3d vec1, Eigen::Vector3d vec2);
+    Eigen::Vector3d transform_point(Eigen::Matrix4d transform, Eigen::Vector3d pt);
+
     boost::array<double, HOMOGENOUS_TRANFORM_ELEMENTS> eigen4d_matrix_to_array(Eigen::Matrix4d transform);
 
     Matrix4dStatistics compute_transform_statistics(std::vector<Eigen::Matrix4d> transforms);

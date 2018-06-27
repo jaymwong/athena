@@ -65,11 +65,24 @@ Eigen::Matrix4d athena::transform::euler_matrix(double roll, double pitch, doubl
   return tf_matrix.matrix();
 }
 
+Eigen::Vector3d athena::transform::transform_point(Eigen::Matrix4d transform, Eigen::Vector3d pt){
+  Eigen::Vector4d point(pt.x(), pt.y(), pt.z(), 1.0);
+  return (transform * point).head<3>();
+}
+
 Eigen::Matrix4d athena::transform::xyzrpy_to_matrix(Eigen::Vector3d xyz, Eigen::Vector3d rpy){
   Eigen::Affine3d affine;
   affine.matrix() = athena::transform::euler_matrix(rpy(0), rpy(1), rpy(2));
   affine.translation() = xyz;
   return affine.matrix();
+}
+
+Eigen::Vector3d athena::transform::compute_midpoint(Eigen::Vector3d vec1, Eigen::Vector3d vec2){
+  double x = vec1.x() + (vec2.x()-vec1.x())/2.0;
+  double y = vec1.y() + (vec2.y()-vec1.y())/2.0;
+  double z = vec1.z() + (vec2.z()-vec1.z())/2.0;
+  Eigen::Vector3d result(x, y, z);
+  return result;
 }
 
 Eigen::Matrix4d athena::transform::xyzrpy_to_matrix(std::vector<double> xyzrpy) {
