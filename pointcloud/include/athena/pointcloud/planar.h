@@ -3,13 +3,19 @@
 
 #include <ros/ros.h>
 #include <Eigen/Core>
+#include <athena/pointcloud/utils.h>
 
 namespace athena{
   namespace pointcloud{
 
     struct ClosestPointResult{
-      Eigen::Vector3d closest_pt;
+      Eigen::Vector3d pt;
+      pcl::PointXYZ pcl_pt;
       double distance;
+    };
+
+    struct ProcessPointCloudResult{
+      pcl::PointCloud<pcl::PointXYZ>::Ptr inliers, outliers;
     };
 
     class PlanarModel{
@@ -19,6 +25,12 @@ namespace athena{
         ~PlanarModel();
 
         ClosestPointResult getClosestPointOnPlane(Eigen::Vector3d point);
+        ClosestPointResult getClosestPointOnPlane(pcl::PointXYZ point);
+
+        int getPointRelativeDirection(pcl::PointXYZ point);
+        int getPointRelativeDirection(Eigen::Vector3d point);
+
+        ProcessPointCloudResult processPointCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, double thresh);
     };
   };
 };

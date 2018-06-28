@@ -131,6 +131,15 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr athena::pointcloud::getCloudPointsWithinStdD
   return out_cloud;
 }
 
+pcl::PointCloud<pcl::PointXYZ>::Ptr athena::pointcloud::removeNegativeWorldPoints(pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud, Eigen::Matrix4d cam_to_world){
+  pcl::PointCloud<pcl::PointXYZ>::Ptr out_cloud = pcl::PointCloud<pcl::PointXYZ>::Ptr(new pcl::PointCloud<pcl::PointXYZ>);
+  pcl::transformPointCloud(*input_cloud, *out_cloud, cam_to_world);
+  out_cloud = athena::pointcloud::doPassThroughFilter(out_cloud, "z", 0.0, kInfinity);
+  Eigen::Matrix4d world_to_cam = cam_to_world.inverse();   // Transform the cloud back into camera frame
+  pcl::transformPointCloud(*out_cloud, *out_cloud, world_to_cam);
+  return out_cloud;
+}
+
 pcl::PointCloud<pcl::PointXYZ>::Ptr athena::pointcloud::doPassThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, std::string axis, double min, double max){
   pcl::PointCloud<pcl::PointXYZ>::Ptr out_cloud (new pcl::PointCloud<pcl::PointXYZ>);
   pcl::PassThrough<pcl::PointXYZ> pass;
