@@ -42,6 +42,10 @@ include_directories(
 link_directories(${PCL_LIBRARY_DIRS})
 add_definitions(${PCL_DEFINITIONS})
 
-add_library(athena_pointcloud src/utils.cpp src/conversions.cpp)
+add_library(athena_pointcloud
+	src/utils.cpp
+	src/conversions.cpp
+	src/planar.cpp
+)
 add_dependencies(athena_pointcloud ${catkin_EXPORTED_TARGETS} )
 target_link_libraries(athena_pointcloud ${catkin_LIBRARIES} ${OpenCV_LIBS} )
