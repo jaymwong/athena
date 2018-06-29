@@ -12,9 +12,11 @@
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <eigen_conversions/eigen_msg.h>
 
+#include <tf2_eigen/tf2_eigen.h>
 #include <tf/transform_datatypes.h>
 #include <tf_conversions/tf_eigen.h>
 #include <Eigen/Core>
+
 
 #define HOMOGENOUS_TRANFORM_ELEMENTS 16
 
@@ -55,6 +57,7 @@ namespace athena{
 
     Eigen::Vector3d compute_midpoint(Eigen::Vector3d vec1, Eigen::Vector3d vec2);
     Eigen::Vector3d transform_point(Eigen::Matrix4d transform, Eigen::Vector3d pt);
+    Eigen::Matrix4d set_translation(Eigen::Matrix4d mat, Eigen::Vector3d vec);
 
     boost::array<double, HOMOGENOUS_TRANFORM_ELEMENTS> eigen4d_matrix_to_array(Eigen::Matrix4d transform);
 

@@ -85,6 +85,11 @@ Eigen::Vector3d athena::transform::compute_midpoint(Eigen::Vector3d vec1, Eigen:
   return result;
 }
 
+Eigen::Matrix4d athena::transform::set_translation(Eigen::Matrix4d mat, Eigen::Vector3d vec){
+  mat.col(3).head<3>() = vec;
+  return mat;
+}
+
 Eigen::Matrix4d athena::transform::xyzrpy_to_matrix(std::vector<double> xyzrpy) {
   Eigen::Affine3d affine;
   affine.matrix() = athena::transform::euler_matrix(xyzrpy[3], xyzrpy[4], xyzrpy[5]);

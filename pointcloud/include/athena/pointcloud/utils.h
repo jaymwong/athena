@@ -4,36 +4,53 @@
 #include <ros/ros.h>
 #include <ros/package.h>
 
+#include <gtest/gtest.h>
+#include <fstream>
+#include <locale>
+#include <stdexcept>
+
 #include <Eigen/Core>
 
+// Core PCL headers as well as message types
 #include <pcl/common/common.h>
 #include <pcl/common/transforms.h>
-#include <pcl/conversions.h>
-#include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
+#include <pcl/point_cloud.h>
+#include <pcl/point_traits.h>
+#include <pcl/conversions.h>
 #include <pcl_conversions/pcl_conversions.h>
+#include <pcl/console/print.h>
 #include <pcl/PCLPointCloud2.h>
+#include <pcl_ros/point_cloud.h>
+
 #include <sensor_msgs/PointCloud2.h>
 #include <geometry_msgs/Pose.h>
 
 #include <pcl/filters/voxel_grid.h>
-#include <pcl/point_cloud.h>
 #include <pcl/kdtree/kdtree_flann.h>
 #include <pcl/features/normal_3d.h>
 #include <pcl/segmentation/region_growing.h>
 #include <pcl/filters/extract_indices.h>
 
+// Various PCL io headers
+#include <pcl/common/io.h>
 #include <pcl/io/pcd_io.h>
-#include <pcl/point_types.h>
+#include <pcl/io/ply_io.h>
+#include <pcl/io/ascii_io.h>
+#include <pcl/io/vtk_lib_io.h>
+
+// Various PCL filters
 #include <pcl/filters/passthrough.h>
 #include <pcl/filters/statistical_outlier_removal.h>
 #include <pcl/registration/icp.h>
 
 #include <pcl/segmentation/sac_segmentation.h>
 #include <pcl/segmentation/extract_clusters.h>
-#include <pcl/filters/statistical_outlier_removal.h>
+#include <pcl/geometry/triangle_mesh.h>
 
+// Athena supported message types
 #include <athena_pointcloud/CloudGeometries.h>
+
 
 #define kInfinity 9999999
 
