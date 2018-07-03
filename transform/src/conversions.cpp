@@ -107,6 +107,25 @@ Eigen::VectorXd athena::transform::xyzrpy_from_matrix(Eigen::Matrix4d matrix){
   return xyzrpy;
 }
 
+
+Eigen::Vector3d athena::transform::diff_vector(Eigen::Vector3d v1, std::vector<double> v2){
+  Eigen::Vector3d result(v1.x()-v2[0], v1.y()-v2[1], v1.z()-v2[2]);
+  return result;
+}
+
+boost::array<double, 3> athena::transform::to_boost_arrayd(Eigen::Vector3d vec){
+  boost::array<double, 3> result;
+  result[0] = vec.x();
+  result[1] = vec.y();
+  result[2] = vec.z();
+  return result;
+}
+
+std::vector<float> athena::transform::to_std_vectorf(Eigen::Vector3d mat){
+  std::vector<float> vec(mat.data(), mat.data() + mat.rows() * mat.cols());
+  return vec;
+}
+
 Eigen::Vector3d athena::transform::quaternion_to_euler(Eigen::Quaterniond q){
   Eigen::Vector3d euler = q.toRotationMatrix().eulerAngles(0, 1, 2);
   return euler;

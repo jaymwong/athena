@@ -60,6 +60,10 @@ namespace athena{
     Eigen::Matrix4d set_translation(Eigen::Matrix4d mat, Eigen::Vector3d vec);
 
     boost::array<double, HOMOGENOUS_TRANFORM_ELEMENTS> eigen4d_matrix_to_array(Eigen::Matrix4d transform);
+    boost::array<double, 3> to_boost_arrayd(Eigen::Vector3d vec);
+    std::vector<float> to_std_vectorf(Eigen::Vector3d mat);
+    Eigen::Vector3d diff_vector(Eigen::Vector3d v1, std::vector<double> v2);
+
 
     Matrix4dStatistics compute_transform_statistics(std::vector<Eigen::Matrix4d> transforms);
     double findmean(std::vector<double> val);
