@@ -220,6 +220,20 @@ pcl::PointCloud<pcl::PointXYZRGB>::Ptr athena::pointcloud::createColorizedPointC
   return colored_cloud;
 }
 
+pcl::PointCloud<pcl::PointXYZ>::Ptr  athena::pointcloud::convertClusterToPointCloud(int idx, std::vector <pcl::PointIndices> clusters, pcl::PointCloud<pcl::PointXYZ>::Ptr raw_cloud) {
+  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_extract_ = pcl::PointCloud<pcl::PointXYZ>::Ptr(new pcl::PointCloud<pcl::PointXYZ>);
+  auto cluster_idxs = clusters.at(idx).indices;
+  cloud_extract_->is_dense = true;
+  cloud_extract_->width = 0;
+  cloud_extract_->height = 1;
+  cloud_extract_->points.clear();
+  for (int idx = 0; idx < cluster_idxs.size(); idx++){
+    pcl::PointXYZ cloud_point = raw_cloud->at(cluster_idxs[idx]);
+    cloud_extract_->points.push_back(cloud_point);
+    cloud_extract_->width = cloud_extract_->width + 1;
+  }
+  return cloud_extract_;
+}
 
 pcl::PointXYZ athena::pointcloud::eigenVectorToPclPointXYZ(Eigen::Vector3d vector){
   pcl::PointXYZ result;
