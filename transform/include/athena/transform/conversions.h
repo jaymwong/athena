@@ -64,6 +64,8 @@ namespace athena{
     std::vector<float> to_std_vectorf(Eigen::Vector3d mat);
     Eigen::Vector3d diff_vector(Eigen::Vector3d v1, std::vector<double> v2);
 
+    geometry_msgs::Pose to_geometry_msg_pose(Eigen::Vector3d vec);
+    Eigen::Vector3d to_eigen_vector3d(geometry_msgs::Pose pose);
 
     Matrix4dStatistics compute_transform_statistics(std::vector<Eigen::Matrix4d> transforms);
     double findmean(std::vector<double> val);

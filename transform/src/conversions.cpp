@@ -182,6 +182,20 @@ Eigen::Matrix4d athena::transform::array_to_eigen4d_matrix(const float transform
   return obj_pose;
 }
 
+geometry_msgs::Pose athena::transform::to_geometry_msg_pose(Eigen::Vector3d vec){
+  geometry_msgs::Pose pose;
+  pose.position.x = vec.x();
+  pose.position.y = vec.y();
+  pose.position.z = vec.z();
+  pose.orientation.w = 1.0;
+  return pose;
+}
+
+Eigen::Vector3d athena::transform::to_eigen_vector3d(geometry_msgs::Pose pose){
+  Eigen::Vector3d vec(pose.position.x, pose.position.y, pose.position.z);
+  return vec;
+}
+
 Eigen::Matrix4d athena::transform::array_to_eigen4d_matrix(const double transform[]){
   Eigen::MatrixXd obj_pose;
   obj_pose.resize(HOMOGENOUS_TRANFORM_ELEMENTS, 1);
