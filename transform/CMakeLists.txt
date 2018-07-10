@@ -26,6 +26,7 @@ catkin_python_setup()
 add_message_files(DIRECTORY msg
   FILES
   HomogeneousTransform.msg
+	HomogeneousTransforms.msg
 )
 
 generate_messages(
