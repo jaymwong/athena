@@ -11,6 +11,7 @@
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl/PCLPointCloud2.h>
 #include <sensor_msgs/PointCloud2.h>
+#include <geometry_msgs/PointStamped.h>
 
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
@@ -22,7 +23,9 @@ namespace athena{
 
     void pointcloudToBGRImage(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &cloud, cv::Mat &coords, cv::Mat &image);
     Eigen::Vector3d pclPointToEigenVector3d(pcl::PointXYZ pt);
+    Eigen::Vector3d toEigen(pcl::PointXYZ pt);
     pcl::PointXYZ eigenVector3dToPclPoint(Eigen::Vector3d vec);
+    pcl::PointXYZ toPclPointXYZ(geometry_msgs::PointStamped msg);
 
   };
 };
