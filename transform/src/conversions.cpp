@@ -287,3 +287,9 @@ double athena::transform::findstd(std::vector<double> val, double mean) {
   }
   return findmean(diff);
 }
+
+std::string athena::transform::toString(Eigen::Vector3d vec){
+  std::string result = "";
+  result = result + std::to_string(vec.x()) + " " + std::to_string(vec.y()) + " " + std::to_string(vec.z());
+  return result;
+}

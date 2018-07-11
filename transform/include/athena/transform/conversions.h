@@ -71,6 +71,8 @@ namespace athena{
     double findmean(std::vector<double> val);
     double findmedian(std::vector<double> val);
     double findstd(std::vector<double> val, double mean);
+
+    std::string toString(Eigen::Vector3d vec);
   };
 };
 

@@ -25,6 +25,9 @@ void athena::pointcloud::pointcloudToBGRImage(const pcl::PointCloud<pcl::PointXY
   }
 }
 
+Eigen::Vector3d athena::pointcloud::toEigen(pcl::PointXYZ pt){
+  return athena::pointcloud::pclPointToEigenVector3d(pt);
+}
 
 Eigen::Vector3d athena::pointcloud::pclPointToEigenVector3d(pcl::PointXYZ pt){
   Eigen::Vector3d vec;
@@ -40,5 +43,10 @@ pcl::PointXYZ athena::pointcloud::eigenVector3dToPclPoint(Eigen::Vector3d vec){
   pt.x = vec.x();
   pt.y = vec.y();
   pt.z = vec.z();
+  return pt;
+}
+
+pcl::PointXYZ athena::pointcloud::toPclPointXYZ(geometry_msgs::PointStamped msg){
+  pcl::PointXYZ pt (msg.point.x, msg.point.y, msg.point.z);
   return pt;
 }
