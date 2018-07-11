@@ -158,6 +158,15 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr athena::pointcloud::doPassThroughCubeCrop(pc
   return out_cloud;
 }
 
+pcl::PointIndices::Ptr athena::pointcloud::findCloudInliers(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, pcl::PointXYZ pt, double radius_x, double radius_y, double radius_z) {
+  pcl::PointIndices::Ptr inliers(new pcl::PointIndices());
+  for (int i = 0; i < cloud->points.size(); i++) {
+    if (fabs(pt.x - cloud->points[i].x) < radius_x && fabs(pt.y - cloud->points[i].y) < radius_y && fabs(pt.z - cloud->points[i].z) < radius_z) {
+      inliers->indices.push_back(i);
+    }
+  }
+  return inliers;
+}
 
 pcl::PointCloud<pcl::PointXYZ>::Ptr athena::pointcloud::getMaxEuclideanClusterFromPointCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud, double tolerance){
   // Creating the KdTree object for the search method of the extraction
