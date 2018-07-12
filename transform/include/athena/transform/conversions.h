@@ -49,6 +49,7 @@ namespace athena{
     Eigen::Matrix4d xyzrpy_to_matrix(std::vector<double> xyzrpy);
     Eigen::Matrix4d translation_matrix(double x, double y, double z);
     Eigen::Matrix4d euler_matrix(double roll, double pitch, double yaw);
+    Eigen::Matrix4d euler_matrix(Eigen::Vector3d rpy);
 
     geometry_msgs::Point eigen3d_vector_to_point(Eigen::Vector3d vec);
 
