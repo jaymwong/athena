@@ -12,6 +12,7 @@
   <buildtool_depend>catkin</buildtool_depend>
   <depend>roscpp</depend>
   <depend>rospy</depend>
+  <depend>athena_parsers</depend>
   <depend>athena_transform</depend>
   <depend>athena_pointcloud</depend>
   <depend>athena_visualization</depend>

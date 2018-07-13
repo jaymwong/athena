@@ -8,12 +8,13 @@ find_package(catkin REQUIRED
 		athena_transform
   	athena_pointcloud
 		athena_visualization
+		athena_parsers
 )
 
 catkin_package(
 	INCLUDE_DIRS include
 #	LIBRARIES athena
-	CATKIN_DEPENDS roscpp message_generation athena_transform athena_pointcloud athena_visualization
+	CATKIN_DEPENDS roscpp message_generation athena_transform athena_pointcloud athena_visualization athena_parsers
 	DEPENDS EIGEN3
 )
 

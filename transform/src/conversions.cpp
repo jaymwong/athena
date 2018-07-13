@@ -199,6 +199,10 @@ Eigen::Vector3d athena::transform::to_eigen_vector3d(geometry_msgs::Pose pose){
   Eigen::Vector3d vec(pose.position.x, pose.position.y, pose.position.z);
   return vec;
 }
+Eigen::VectorXd athena::transform::to_eigen_vectorXd(std::vector<double> input){
+  Eigen::VectorXd v = Eigen::Map<Eigen::VectorXd, Eigen::Unaligned>(input.data(), input.size());
+  return v;
+}
 
 Eigen::Matrix4d athena::transform::array_to_eigen4d_matrix(const double transform[]){
   Eigen::MatrixXd obj_pose;
