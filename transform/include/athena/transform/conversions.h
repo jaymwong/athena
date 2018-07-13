@@ -67,6 +67,7 @@ namespace athena{
 
     geometry_msgs::Pose to_geometry_msg_pose(Eigen::Vector3d vec);
     Eigen::Vector3d to_eigen_vector3d(geometry_msgs::Pose pose);
+    Eigen::VectorXd to_eigen_vectorXd(std::vector<double> input);
 
     Matrix4dStatistics compute_transform_statistics(std::vector<Eigen::Matrix4d> transforms);
     double findmean(std::vector<double> val);
