@@ -53,6 +53,10 @@ Eigen::Vector3d athena::transform::euler_from_matrix(Eigen::Matrix4d matrix){
   return result;
 }
 
+Eigen::Matrix4d athena::transform::euler_matrix(Eigen::Vector3d rpy){
+  return euler_matrix(rpy[0], rpy[1], rpy[2]);
+}
+
 Eigen::Matrix4d athena::transform::euler_matrix(double roll, double pitch, double yaw){
   tf::Transform transform;
   transform.setOrigin(tf::Vector3(0.0, 0.0, 0.0));
