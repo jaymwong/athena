@@ -321,16 +321,13 @@ BoundingBoxGeometry athena::pointcloud::obtainBoundingBoxGeomtry (pcl::PointClou
   box_geometry.AABB_dimensions = aabb_max_point - aabb_min_point;
   box_geometry.OBB_dimensions = obb_max_point - obb_min_point;
 
-  std::cout << "AABB Dimensions >>>>>  X :  " << box_geometry.AABB_dimensions.x() << "Y : " <<  box_geometry.AABB_dimensions.y() << "Z : " << box_geometry.AABB_dimensions.z() << "\n";
-  std::cout << "OBB Dimensions >>>>> X : " << box_geometry.OBB_dimensions.x() << " Y : " << box_geometry.OBB_dimensions.y() << " Z : " << box_geometry.OBB_dimensions.z() << "\n";
-
   Eigen::Matrix4f projectionTransform(Eigen::Matrix4f::Identity());
   projectionTransform.block<3,3>(0,0) = rotational_matrix_OBB;
   projectionTransform.block<3,1>(0,3) = position.cast <float> ();
   box_geometry.transformation_world_to_OBB.matrix() = projectionTransform.cast <double> ();
 
   box_geometry.yaw  = computeBoundingBoxYaw(rotational_matrix_OBB, box_geometry.AABB_dimensions, box_geometry.OBB_dimensions);
-  std::cout << "Yaw : " << box_geometry.yaw << "\n";
+
   box_geometry.bounding_box = createVisualizationMarker(box_geometry.OBB_dimensions, centre_diagonal);
 
   return box_geometry;
@@ -352,7 +349,7 @@ double athena::pointcloud::computeBoundingBoxYaw(Eigen::Matrix3f rotation_matrix
 
   world_point = transformToWorldCoordinates(*tf_buffer_ ,OBB_dimensions,"obb_box_frame_without_translation");
   auto rpy = athena::transform::euler_from_matrix(projectionTransform.cast <double> ());
-  std::cout << "Rotation >>>>> R : " << rpy[0] * 180 / M_PI << " P : " << rpy[1] * 180 / M_PI << " Y : " << rpy[2] * 180 / M_PI << "\n";
+
   // sort the AABB dimensions in decreasing and get the corresponding sorted index number for x, y and z-axis
   std::vector<int> index_sort = sortAABBDimensions(AABB_dimensions);
 
@@ -365,15 +362,13 @@ double athena::pointcloud::computeBoundingBoxYaw(Eigen::Matrix3f rotation_matrix
   double z_world = asin(value);
   if (world_point[index_sort[2]].z() < 0)
     z_world = M_PI - z_world ;
-  std::cout << "Z-angle : " << z_world * 180 / M_PI << "\n";
-
 
   if (rpy[2] * 180 / M_PI < 90 && rpy[2] * 180 / M_PI > -90) {
     projectionTransform *= athena::transform::euler_matrix(0, 0, z_world).cast <float> ();
   } else {
     projectionTransform *= athena::transform::euler_matrix(0, 0, -z_world).cast <float> ();
   }
-  
+
   athena::transform::publish_matrix_as_tf(br_, projectionTransform.cast <double> (), "world", "obb_box_corrected_frame_without_translation");
 
   world_point = transformToWorldCoordinates(*tf_buffer_, OBB_dimensions, "obb_box_corrected_frame_without_translation");
