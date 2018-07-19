@@ -10,6 +10,7 @@
 #include <stdexcept>
 
 #include <Eigen/Core>
+#include <cmath>
 
 // Core PCL headers as well as message types
 #include <pcl/common/common.h>
@@ -25,6 +26,11 @@
 
 #include <sensor_msgs/PointCloud2.h>
 #include <geometry_msgs/Pose.h>
+#include <visualization_msgs/Marker.h>
+
+#include <tf/transform_broadcaster.h>
+#include <tf2_ros/transform_listener.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 
 #include <pcl/filters/voxel_grid.h>
 #include <pcl/kdtree/kdtree_flann.h>
@@ -48,14 +54,27 @@
 #include <pcl/segmentation/extract_clusters.h>
 #include <pcl/geometry/triangle_mesh.h>
 
+// for finding AABB and OBB
+#include <pcl/features/moment_of_inertia_estimation.h>
+
+#include <athena/transform/conversions.h>
 // Athena supported message types
 #include <athena_pointcloud/CloudGeometries.h>
 
+#include "athena/pointcloud/conversions.h"
 
 #define kInfinity 9999999
 
 struct PointCloudProperties{
   pcl::PointXYZ min_point, max_point;
+};
+
+struct BoundingBoxGeometry {
+  Eigen::Vector3d AABB_dimensions;
+  Eigen::Vector3d OBB_dimensions;
+  Eigen::Affine3d transformation_world_to_OBB;
+  double yaw;
+  visualization_msgs::Marker bounding_box;
 };
 
 namespace athena {
@@ -116,6 +135,12 @@ namespace athena {
     void publishPointCloudXYZRGB(ros::Publisher pub, pcl::PointCloud<pcl::PointXYZRGB> &pcl_cloud, std::string frame_id);
 
     PointCloudProperties computePointCloudMinMax(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud);
+
+    BoundingBoxGeometry obtainBoundingBoxGeomtry (pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud);
+    double computeBoundingBoxYaw(Eigen::Matrix3f rotation_matrix, Eigen::Vector3d AABB_dimensions, Eigen::Vector3d OBB_dimensions);
+    visualization_msgs::Marker createVisualizationMarker(Eigen::Vector3d OBB_dimensions, Eigen::Vector3d center);
+    std::vector<int> sortAABBDimensions(Eigen::Vector3d AABB_dimensions);
+    std::vector<Eigen::Vector3d> transformToWorldCoordinates(tf2_ros::Buffer &tf_buffer, Eigen::Vector3d OBB_dimensions, std::string source_frame);
 
     pcl::PointXYZ eigenVectorToPclPointXYZ(Eigen::Vector3d vector);
     geometry_msgs::Pose pclPointXYZToGeometryMsgPose(pcl::PointXYZ pt);

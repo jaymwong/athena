@@ -37,6 +37,13 @@ Eigen::Vector3d athena::pointcloud::pclPointToEigenVector3d(pcl::PointXYZ pt){
   return vec;
 }
 
+Eigen::Vector3d athena::pointcloud::GeometryMsgsPoseStampedToeigenVector3d(geometry_msgs::PoseStamped pt) {
+  Eigen::Vector3d point;
+  point.x() = pt.pose.position.x;
+  point.y() = pt.pose.position.y;
+  point.z() = pt.pose.position.z;
+  return point;
+}
 
 pcl::PointXYZ athena::pointcloud::eigenVector3dToPclPoint(Eigen::Vector3d vec){
   pcl::PointXYZ pt;

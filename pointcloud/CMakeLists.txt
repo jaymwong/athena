@@ -8,6 +8,7 @@ find_package(catkin REQUIRED
 	message_generation
 	pcl_ros
 	pcl_conversions
+	athena_transform
 )
 
 find_package(cmake_modules REQUIRED)
@@ -28,7 +29,7 @@ generate_messages(
 catkin_package(
 	INCLUDE_DIRS include
 	LIBRARIES athena_pointcloud
-	CATKIN_DEPENDS roscpp message_generation pcl_ros pcl_conversions
+	CATKIN_DEPENDS roscpp message_generation pcl_ros pcl_conversions athena_transform
 	DEPENDS EIGEN3
 )
 

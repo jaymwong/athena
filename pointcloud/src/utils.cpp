@@ -293,3 +293,168 @@ geometry_msgs::Pose athena::pointcloud::pclPointXYZToGeometryMsgPose(pcl::PointX
   pose.orientation.w = 1.0;
   return pose;
 }
+
+BoundingBoxGeometry athena::pointcloud::obtainBoundingBoxGeomtry (pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud) {
+  BoundingBoxGeometry box_geometry;
+  pcl::PointXYZ min_point_OBB;
+  pcl::PointXYZ max_point_OBB;
+  pcl::PointXYZ min_point_AABB;
+  pcl::PointXYZ max_point_AABB;
+  pcl::PointXYZ position_OBB;
+  Eigen::Matrix3f rotational_matrix_OBB;
+  tf::TransformBroadcaster br_;
+
+  pcl::MomentOfInertiaEstimation<pcl::PointXYZ> feature_extractor;
+  feature_extractor.setInputCloud(input_cloud);
+  feature_extractor.compute();
+
+  feature_extractor.getAABB(min_point_AABB, max_point_AABB);
+  feature_extractor.getOBB(min_point_OBB, max_point_OBB, position_OBB, rotational_matrix_OBB);
+
+  auto obb_min_point = athena::pointcloud::pclPointToEigenVector3d(min_point_OBB);
+  auto obb_max_point = athena::pointcloud::pclPointToEigenVector3d(max_point_OBB);
+  auto aabb_min_point = athena::pointcloud::pclPointToEigenVector3d(min_point_AABB);
+  auto aabb_max_point = athena::pointcloud::pclPointToEigenVector3d(max_point_AABB);
+  auto position = athena::pointcloud::pclPointToEigenVector3d(position_OBB);
+  auto centre_diagonal = 0.5 * (obb_min_point + obb_max_point);
+
+  box_geometry.AABB_dimensions = aabb_max_point - aabb_min_point;
+  box_geometry.OBB_dimensions = obb_max_point - obb_min_point;
+
+  std::cout << "AABB Dimensions >>>>>  X :  " << box_geometry.AABB_dimensions.x() << "Y : " <<  box_geometry.AABB_dimensions.y() << "Z : " << box_geometry.AABB_dimensions.z() << "\n";
+  std::cout << "OBB Dimensions >>>>> X : " << box_geometry.OBB_dimensions.x() << " Y : " << box_geometry.OBB_dimensions.y() << " Z : " << box_geometry.OBB_dimensions.z() << "\n";
+
+  Eigen::Matrix4f projectionTransform(Eigen::Matrix4f::Identity());
+  projectionTransform.block<3,3>(0,0) = rotational_matrix_OBB;
+  projectionTransform.block<3,1>(0,3) = position.cast <float> ();
+  box_geometry.transformation_world_to_OBB.matrix() = projectionTransform.cast <double> ();
+
+  box_geometry.yaw  = computeBoundingBoxYaw(rotational_matrix_OBB, box_geometry.AABB_dimensions, box_geometry.OBB_dimensions);
+  std::cout << "Yaw : " << box_geometry.yaw << "\n";
+  box_geometry.bounding_box = createVisualizationMarker(box_geometry.OBB_dimensions, centre_diagonal);
+
+  return box_geometry;
+}
+
+// step 0 : based on AABB dimension, find the OBB axis corresponding to x, y & z of the world
+// step 1 : find angle b/w z-axis and corresponding OBB axis. If world z pt is +ve angle is angle, otherwise 180 - angle
+// step 2 : if world pt has z-axis(x /y-axis) 0, then rotate it around OBB-axis corresponding to z-axis(x/y-axis).
+// step 3 : based on AABB dimension choose the biggest in x-y axis and find the angle b/w that OBB axis and the world X-axis which is nothing but yaw
+double athena::pointcloud::computeBoundingBoxYaw(Eigen::Matrix3f rotation_matrix, Eigen::Vector3d AABB_dimensions, Eigen::Vector3d OBB_dimensions) {
+  tf2_ros::Buffer *tf_buffer_ = new tf2_ros::Buffer;
+  tf2_ros::TransformListener *tf_listener_ = new tf2_ros::TransformListener(*tf_buffer_);
+  tf::TransformBroadcaster br_;
+  std::vector<Eigen::Vector3d> world_point;
+
+  Eigen::Matrix4f projectionTransform(Eigen::Matrix4f::Identity());
+  projectionTransform.block<3,3>(0,0) = rotation_matrix;
+  athena::transform::publish_matrix_as_tf(br_, projectionTransform.cast <double> (), "world", "obb_box_frame_without_translation");
+
+  world_point = transformToWorldCoordinates(*tf_buffer_ ,OBB_dimensions,"obb_box_frame_without_translation");
+  auto rpy = athena::transform::euler_from_matrix(projectionTransform.cast <double> ());
+  std::cout << "Rotation >>>>> R : " << rpy[0] * 180 / M_PI << " P : " << rpy[1] * 180 / M_PI << " Y : " << rpy[2] * 180 / M_PI << "\n";
+  // sort the AABB dimensions in decreasing and get the corresponding sorted index number for x, y and z-axis
+  std::vector<int> index_sort = sortAABBDimensions(AABB_dimensions);
+
+  // choose the bigger dimension in x-y plane to compute yaw
+  if (index_sort[0] > index_sort[1]) {
+    index_sort[0] = index_sort[1];
+  }
+
+  double value = double(sqrt(pow(world_point[index_sort[2]].x(), 2) + pow(world_point[index_sort[2]].y(), 2)) / world_point[index_sort[2]].norm());
+  double z_world = asin(value);
+  if (world_point[index_sort[2]].z() < 0)
+    z_world = M_PI - z_world ;
+  std::cout << "Z-angle : " << z_world * 180 / M_PI << "\n";
+
+
+  if (rpy[2] * 180 / M_PI < 90 && rpy[2] * 180 / M_PI > -90) {
+    projectionTransform *= athena::transform::euler_matrix(0, 0, z_world).cast <float> ();
+  } else {
+    projectionTransform *= athena::transform::euler_matrix(0, 0, -z_world).cast <float> ();
+  }
+  
+  athena::transform::publish_matrix_as_tf(br_, projectionTransform.cast <double> (), "world", "obb_box_corrected_frame_without_translation");
+
+  world_point = transformToWorldCoordinates(*tf_buffer_, OBB_dimensions, "obb_box_corrected_frame_without_translation");
+
+  value = double(sqrt(pow(world_point[index_sort[0]].y(), 2) + pow(world_point[index_sort[0]].z(), 2)) / world_point[index_sort[0]].norm());
+  if (world_point[index_sort[0]].x() * world_point[index_sort[0]].y() > 0)
+   return asin(value) * 180 / M_PI;
+  else
+   return -1 * asin(value) * 180 / M_PI;
+}
+
+visualization_msgs::Marker athena::pointcloud::createVisualizationMarker(Eigen::Vector3d OBB_dimensions, Eigen::Vector3d center) {
+  visualization_msgs::Marker viz_geometry;
+  viz_geometry.type = visualization_msgs::Marker::CUBE;
+  viz_geometry.action = visualization_msgs::Marker::MODIFY;
+  viz_geometry.header.stamp = ros::Time::now();
+  viz_geometry.header.frame_id = "obb_box_frame";
+
+  viz_geometry.scale.x = OBB_dimensions.x();
+  viz_geometry.scale.y = OBB_dimensions.y();
+  viz_geometry.scale.z = OBB_dimensions.z();
+
+  viz_geometry.pose.position.x = center.x();
+  viz_geometry.pose.position.y = center.y();
+  viz_geometry.pose.position.z = center.z();
+  viz_geometry.pose.orientation.w = 1.0;
+
+  viz_geometry.color.r = 1.0;
+  viz_geometry.color.g = 0.0;
+  viz_geometry.color.b = 0.0;
+  viz_geometry.color.a = 0.475 + (0.05 *((double) rand() / (RAND_MAX)));
+
+  return viz_geometry;
+}
+
+std::vector<int> athena::pointcloud::sortAABBDimensions(Eigen::Vector3d AABB_dimensions) {
+  std::vector<int> sorted_index;
+  if (AABB_dimensions.z() > AABB_dimensions.y()) {
+    if (AABB_dimensions.z() > AABB_dimensions.x()) {
+      if (AABB_dimensions.x() > AABB_dimensions.y()) {
+        std::cout << "Z > X > Y" << "\n";
+        sorted_index = {1, 2, 0};
+      } else {
+        std::cout << "Z > Y > X" << "\n";
+        sorted_index = {2, 1, 0};
+      }
+    } else {
+      std::cout << "X > Z > Y" << "\n";
+      sorted_index = {0, 2, 1};
+    }
+  } else {
+    if (AABB_dimensions.z() > AABB_dimensions.x()) {
+      std::cout << "Y > Z > X" << "\n";
+      sorted_index = {2, 0, 1};
+    } else {
+      if (AABB_dimensions.x() > AABB_dimensions.y()) {
+        std::cout << "X > Y > Z" << "\n";
+        sorted_index = {0, 1, 2};
+      } else {
+        std::cout << "Y > X > Z" << "\n";
+        sorted_index = {1, 0, 2};
+      }
+    }
+  }
+  return sorted_index;
+}
+
+std::vector<Eigen::Vector3d> athena::pointcloud::transformToWorldCoordinates(tf2_ros::Buffer &tf_buffer, Eigen::Vector3d OBB_dimensions, std::string source_frame) {
+  std::vector<Eigen::Vector3d> world_point;
+  geometry_msgs::PoseStamped p1, p2, p3;
+  p1.pose.position.x = 0.5 * OBB_dimensions.x();
+  p2.pose.position.y = 0.5 * OBB_dimensions.y();
+  p3.pose.position.z = 0.5 * OBB_dimensions.z();
+
+  p1 = athena::transform::transform_point(tf_buffer, p1, source_frame, "world");
+  p2 = athena::transform::transform_point(tf_buffer, p2, source_frame, "world");
+  p3 = athena::transform::transform_point(tf_buffer, p3, source_frame, "world");
+
+  world_point.push_back(GeometryMsgsPoseStampedToeigenVector3d(p1));
+  world_point.push_back(GeometryMsgsPoseStampedToeigenVector3d(p2));
+  world_point.push_back(GeometryMsgsPoseStampedToeigenVector3d(p3));
+
+  return world_point;
+}
