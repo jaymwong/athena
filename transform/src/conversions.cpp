@@ -1,7 +1,5 @@
 #include "athena/transform/conversions.h"
 
-
-
 tf::Transform athena::transform::pose_stamped_msg_to_tf(geometry_msgs::PoseStamped pose_msg){
   tf::Transform transform_result;
   transform_result.setOrigin(tf::Vector3(pose_msg.pose.position.x, pose_msg.pose.position.y, pose_msg.pose.position.z));
@@ -48,8 +46,8 @@ Eigen::Vector3d athena::transform::translation_from_matrix(Eigen::Matrix4d matri
 }
 
 Eigen::Vector3d athena::transform::euler_from_matrix(Eigen::Matrix4d matrix){
-  auto euler = matrix.block<3,3>(0, 0).eulerAngles(2, 1, 0);
-  Eigen::Vector3d result(euler(2), euler(1), euler(0));
+  auto euler = matrix.block<3,3>(0, 0).eulerAngles(0, 1, 2);
+  Eigen::Vector3d result(euler(0), euler(1), euler(2));
   return result;
 }
 
