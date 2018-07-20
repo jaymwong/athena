@@ -157,6 +157,15 @@ Eigen::Quaternionf athena::transform::euler_to_quaternion(Eigen::Vector3d euler)
   return q;
 }
 
+Eigen::Quaternionf athena::transform::euler_to_quaternion(double roll, double pitch, double yaw) {
+  Eigen::Quaternionf q;
+  q = Eigen::AngleAxisf(roll, Eigen::Vector3f::UnitX())
+    * Eigen::AngleAxisf(pitch, Eigen::Vector3f::UnitY())
+    * Eigen::AngleAxisf(yaw, Eigen::Vector3f::UnitZ());
+  return q;
+}
+
+
 Eigen::Vector3d athena::transform::euler_from_rotation(Eigen::Matrix3d rot){
   return rot.eulerAngles(0, 1, 2);
 }

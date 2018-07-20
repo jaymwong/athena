@@ -42,6 +42,7 @@ namespace athena{
     Eigen::VectorXd xyzrpy_from_matrix(Eigen::Matrix4d matrix);
 
     Eigen::Quaternionf euler_to_quaternion(Eigen::Vector3d euler);
+    Eigen::Quaternionf euler_to_quaternion(double roll, double pitch, double yaw);
     Eigen::Vector3d quaternion_to_euler(Eigen::Quaterniond q);
     Eigen::Vector3d euler_from_rotation(Eigen::Matrix3d rot);
 

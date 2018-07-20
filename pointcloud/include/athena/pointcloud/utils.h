@@ -137,8 +137,8 @@ namespace athena {
     PointCloudProperties computePointCloudMinMax(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud);
 
     BoundingBoxGeometry obtainBoundingBoxGeomtry (pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud);
-    double computeBoundingBoxYaw(Eigen::Matrix3f rotation_matrix, Eigen::Vector3d AABB_dimensions, Eigen::Vector3d OBB_dimensions);
-    visualization_msgs::Marker createVisualizationMarker(Eigen::Vector3d OBB_dimensions, Eigen::Vector3d center);
+    double computeBoundingBoxYaw(Eigen::Matrix3f rotation_matrix, Eigen::Vector3d position, Eigen::Vector3d AABB_dimensions, Eigen::Vector3d OBB_dimensions);
+    visualization_msgs::Marker createVisualizationMarker(Eigen::Vector3d OBB_dimensions, Eigen::Vector3d center, double yaw);
     std::vector<int> sortAABBDimensions(Eigen::Vector3d AABB_dimensions);
     std::vector<Eigen::Vector3d> transformToWorldCoordinates(tf2_ros::Buffer &tf_buffer, Eigen::Vector3d OBB_dimensions, std::string source_frame);
 
