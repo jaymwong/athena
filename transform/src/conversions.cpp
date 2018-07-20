@@ -39,6 +39,10 @@ Eigen::Matrix4d athena::transform::translation_matrix(double x, double y, double
   return matrix;
 }
 
+Eigen::Matrix4d athena::transform::translation_matrix(Eigen::Vector3d xyz){
+  return translation_matrix(xyz.x(), xyz.y(), xyz.z());
+}
+
 Eigen::Vector3d athena::transform::translation_from_matrix(Eigen::Matrix4d matrix){
   Eigen::Affine3d affine_matrix;
   affine_matrix.matrix() = matrix;
@@ -61,6 +65,17 @@ Eigen::Matrix4d athena::transform::euler_matrix(double roll, double pitch, doubl
   transform.setOrigin(tf::Vector3(0.0, 0.0, 0.0));
   tf::Quaternion q;
   q.setRPY(roll, pitch, yaw);
+  transform.setRotation(q);
+
+  Eigen::Isometry3d tf_matrix;
+  tf::transformTFToEigen(transform,  tf_matrix);
+  return tf_matrix.matrix();
+}
+
+Eigen::Matrix4d athena::transform::quaternion_matrix(double x, double y, double z, double w){
+  tf::Transform transform;
+  transform.setOrigin(tf::Vector3(0.0, 0.0, 0.0));
+  tf::Quaternion q(x, y, z, w);
   transform.setRotation(q);
 
   Eigen::Isometry3d tf_matrix;
