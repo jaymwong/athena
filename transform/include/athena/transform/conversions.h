@@ -50,6 +50,7 @@ namespace athena{
     Eigen::Matrix4d translation_matrix(double x, double y, double z);
     Eigen::Matrix4d euler_matrix(double roll, double pitch, double yaw);
     Eigen::Matrix4d euler_matrix(Eigen::Vector3d rpy);
+    Eigen::Matrix4d quaternion_matrix(double x, double y, double z, double w);
 
     geometry_msgs::Point eigen3d_vector_to_point(Eigen::Vector3d vec);
 
