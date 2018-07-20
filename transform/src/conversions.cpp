@@ -39,6 +39,10 @@ Eigen::Matrix4d athena::transform::translation_matrix(double x, double y, double
   return matrix;
 }
 
+Eigen::Matrix4d athena::transform::translation_matrix(Eigen::Vector3d xyz){
+  return translation_matrix(xyz.x(), xyz.y(), xyz.z());
+}
+
 Eigen::Vector3d athena::transform::translation_from_matrix(Eigen::Matrix4d matrix){
   Eigen::Affine3d affine_matrix;
   affine_matrix.matrix() = matrix;
