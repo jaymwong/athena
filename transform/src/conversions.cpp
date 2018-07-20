@@ -45,9 +45,10 @@ Eigen::Vector3d athena::transform::translation_from_matrix(Eigen::Matrix4d matri
   return affine_matrix.translation();
 }
 
+// The angles should be passed backwards!!
 Eigen::Vector3d athena::transform::euler_from_matrix(Eigen::Matrix4d matrix){
-  auto euler = matrix.block<3,3>(0, 0).eulerAngles(0, 1, 2);
-  Eigen::Vector3d result(euler(0), euler(1), euler(2));
+  auto euler = matrix.block<3,3>(0, 0).eulerAngles(2, 1, 0);
+  Eigen::Vector3d result(euler(2), euler(1), euler(0));
   return result;
 }
 
