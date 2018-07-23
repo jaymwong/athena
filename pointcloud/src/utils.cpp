@@ -8,19 +8,22 @@ Eigen::Vector3d athena::pointcloud::computePointCloudMedian(pcl::PointCloud<pcl:
     cloud_x.push_back(pt.x);
     cloud_y.push_back(pt.y);
     cloud_z.push_back(pt.z);
+    // std::cout << "  [athena] > point " << pt.x << " " << pt.y << " " << pt.z << "\n";
   }
+  // std::cout << "  [athena] > point cloud size: " << cloud->points.size() << " (" << cloud_x.size() << " " << cloud_y.size() << " " << cloud_z.size() << ")\n";
   return computePointCloudMedian(cloud_x, cloud_y, cloud_z);
 }
 
 Eigen::Vector3d athena::pointcloud::computePointCloudMedian(std::vector<double> cluster_pt_x, std::vector<double> cluster_pt_y, std::vector<double> cluster_pt_z){
-  Eigen::Vector3d median;
+
   sort(cluster_pt_x.begin(), cluster_pt_x.end());
   sort(cluster_pt_y.begin(), cluster_pt_y.end());
   sort(cluster_pt_z.begin(), cluster_pt_z.end());
 
-  median(0) = cluster_pt_x.at(cluster_pt_x.size()/2);
-  median(1) = cluster_pt_y.at(cluster_pt_y.size()/2);
-  median(2) = cluster_pt_z.at(cluster_pt_z.size()/2);
+  Eigen::Vector3d median( cluster_pt_x.at(cluster_pt_x.size()/2),
+                          cluster_pt_y.at(cluster_pt_y.size()/2),
+                          cluster_pt_z.at(cluster_pt_z.size()/2));
+  // std::cout << "  [athena] > median computed: " << median.x() << " " << median.y() << " " << median.z() << "\n";
   return median;
 }
 
