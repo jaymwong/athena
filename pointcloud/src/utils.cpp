@@ -168,6 +168,21 @@ pcl::PointIndices::Ptr athena::pointcloud::findCloudInliers(pcl::PointCloud<pcl:
   return inliers;
 }
 
+pcl::PointCloud<pcl::PointXYZ>::Ptr athena::pointcloud::removeSubCloudFromOriginalCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr original_cloud_, pcl::PointXYZ pt,
+                                       double radius_x, double radius_y, double radius_z) {
+  pcl::PointIndices::Ptr inliers(new pcl::PointIndices());
+  inliers = athena::pointcloud::findCloudInliers(original_cloud_, pt, radius_x, radius_y, radius_z);
+  std::cout << "No.of inliers: " << inliers->indices.size() << "\n";
+
+  pcl::ExtractIndices<pcl::PointXYZ> extract;
+  extract.setInputCloud(original_cloud_);
+  extract.setIndices(inliers);
+  extract.setNegative(true);
+  extract.filter(*original_cloud_);
+  return original_cloud_;
+}
+
+
 pcl::PointCloud<pcl::PointXYZ>::Ptr athena::pointcloud::getMaxEuclideanClusterFromPointCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud, double tolerance){
   // Creating the KdTree object for the search method of the extraction
   pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ>);
@@ -284,7 +299,6 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr athena::pointcloud::doNeighborRadiusSearch(p
    return extracted_cloud;
 }
 
-
 geometry_msgs::Pose athena::pointcloud::pclPointXYZToGeometryMsgPose(pcl::PointXYZ pt){
   geometry_msgs::Pose pose;
   pose.position.x = pt.x;
@@ -294,7 +308,7 @@ geometry_msgs::Pose athena::pointcloud::pclPointXYZToGeometryMsgPose(pcl::PointX
   return pose;
 }
 
-BoundingBoxGeometry athena::pointcloud::obtainBoundingBoxGeomtry (pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud) {
+BoundingBoxGeometry athena::pointcloud::obtainBoundingBoxGeomtry (pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud, ros::Publisher pub_transformed_cloud) {
   pcl::PointCloud<pcl::PointXYZ>::Ptr transformed_cloud = pcl::PointCloud<pcl::PointXYZ>::Ptr(new pcl::PointCloud<pcl::PointXYZ>);
   BoundingBoxGeometry box_geometry;
   pcl::PointXYZ min_point_OBB, max_point_OBB, min_point_AABB, max_point_AABB;
@@ -325,7 +339,10 @@ BoundingBoxGeometry athena::pointcloud::obtainBoundingBoxGeomtry (pcl::PointClou
 
   box_geometry.yaw  = computeBoundingBoxYaw(rotational_matrix_OBB, position, box_geometry.AABB_dimensions, box_geometry.OBB_dimensions);
 
-  pcl::transformPointCloud(*input_cloud, *transformed_cloud, athena::transform::euler_matrix(0, 0, -box_geometry.yaw * M_PI / 180));
+  pcl::transformPointCloud(*input_cloud, *transformed_cloud, athena::transform::translation_matrix(-position[0], -position[1], -position[2]));
+  pcl::transformPointCloud(*transformed_cloud, *transformed_cloud, athena::transform::euler_matrix(0, 0, -box_geometry.yaw * M_PI / 180));
+  pcl::transformPointCloud(*transformed_cloud, *transformed_cloud, athena::transform::translation_matrix(position[0], position[1], position[2]));
+  publishPointCloudXYZ(pub_transformed_cloud, *transformed_cloud, "world");
   pcl::getMinMax3D (*transformed_cloud, min_point_world, max_point_world);
   auto min_point = athena::pointcloud::pclPointToEigenVector3d(min_point_world);
   auto max_point = athena::pointcloud::pclPointToEigenVector3d(max_point_world);
@@ -351,7 +368,7 @@ double athena::pointcloud::computeBoundingBoxYaw(Eigen::Matrix3f rotation_matrix
   projectionTransform.block<3,3>(0,0) = rotation_matrix;
   athena::transform::publish_matrix_as_tf(br_, projectionTransform.cast <double> (), "world", "obb_box_frame_without_translation");
 
-  world_point = transformToWorldCoordinates(*tf_buffer_ ,OBB_dimensions,"obb_box_frame_without_translation");
+  world_point = transformToWorldCoordinates(*tf_buffer_ ,OBB_dimensions, "obb_box_frame_without_translation");
 
   std::vector<int> index_sort = sortAABBDimensions(AABB_dimensions);
 
@@ -367,11 +384,19 @@ double athena::pointcloud::computeBoundingBoxYaw(Eigen::Matrix3f rotation_matrix
   if (world_point[index_sort[2]].z() < 0)
     z_world = M_PI - z_world ;
 
-  if ((world_point[2].x() > 0 && z_world * 180 / M_PI < 90) || (world_point[2].x() < 0 && z_world * 180 / M_PI > 90)) {
-    projectionTransform *= athena::transform::euler_matrix(0, 0, z_world).cast <float> ();
-  } else if ((world_point[2].x() < 0 && z_world * 180 / M_PI < 90) || (world_point[2].x() > 0 && z_world * 180 / M_PI > 90)){
-    projectionTransform *= athena::transform::euler_matrix(0, 0, -z_world).cast <float> ();
+  if (world_point[index_sort[2]].y() > 0) {
+    projectionTransform = athena::transform::euler_matrix(z_world, 0, 0).cast <float> () * projectionTransform;
+  } else {
+    projectionTransform = athena::transform::euler_matrix(-z_world, 0, 0).cast <float> () * projectionTransform;
   }
+
+  /**
+  if ((world_point[2].x() > 0 && z_world * 180 / M_PI < 90) || (world_point[2].x() < 0 && z_world * 180 / M_PI > 90)) {
+    projectionTransform *= athena::transform::euler_matrix(z_world, 0, 0).cast <float> ();
+  } else if ((world_point[2].x() < 0 && z_world * 180 / M_PI < 90) || (world_point[2].x() > 0 && z_world * 180 / M_PI > 90)){
+    projectionTransform *= athena::transform::euler_matrix(-z_world, 0, 0).cast <float> ();
+  }
+  **/
   athena::transform::publish_matrix_as_tf(br_, projectionTransform.cast <double> (), "world", "obb_box_corrected_frame_without_translation");
 
   world_point = transformToWorldCoordinates(*tf_buffer_, OBB_dimensions, "obb_box_corrected_frame_without_translation");
