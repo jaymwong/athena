@@ -47,6 +47,7 @@ add_library(athena_pointcloud
 	src/utils.cpp
 	src/conversions.cpp
 	src/planar.cpp
+	src/bounding_geometry.cpp
 )
 add_dependencies(athena_pointcloud ${catkin_EXPORTED_TARGETS} )
 target_link_libraries(athena_pointcloud ${catkin_LIBRARIES} ${OpenCV_LIBS} )

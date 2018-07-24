@@ -1,5 +1,5 @@
-#ifndef POINTCLOUD_CONVERSIONS_UTILS_H
-#define POINTCLOUD_CONVERSIONS_UTILS_H
+#ifndef POINTCLOUD_BOUNDING_GEOMETRY_H
+#define POINTCLOUD_BOUNDING_GEOMETRY_H
 
 #include <ros/ros.h>
 #include <ros/package.h>
@@ -54,27 +54,10 @@
 #include <pcl/segmentation/extract_clusters.h>
 #include <pcl/geometry/triangle_mesh.h>
 
-// for finding AABB and OBB
-#include <pcl/features/moment_of_inertia_estimation.h>
-
-#include <athena/transform/conversions.h>
-// Athena supported message types
-#include <athena_pointcloud/CloudGeometries.h>
-
-#include "athena/pointcloud/conversions.h"
-
 #define kInfinity 9999999
 
 struct PointCloudProperties{
   pcl::PointXYZ min_point, max_point;
-};
-
-struct BoundingBoxGeometry {
-  Eigen::Vector3d AABB_dimensions;
-  Eigen::Vector3d OBB_dimensions;
-  Eigen::Affine3d transformation_world_to_OBB;
-  double yaw;
-  visualization_msgs::Marker bounding_box;
 };
 
 namespace athena {
@@ -92,14 +75,6 @@ namespace athena {
 
     // Directly just computing the min and max from the input cloud and calling that a tentative bounding geometry
     PointCloudProperties computePointCloudMinMax(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud);
-    Eigen::Vector3d computePointCloudBoundingBoxOrigin(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud);
-
-
-    BoundingBoxGeometry obtainBoundingBoxGeomtry (pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud, ros::Publisher pub_transformed_cloud);
-    double computeBoundingBoxYaw(Eigen::Matrix3f rotation_matrix, Eigen::Vector3d position, Eigen::Vector3d AABB_dimensions, Eigen::Vector3d OBB_dimensions);
-    visualization_msgs::Marker createVisualizationMarker(Eigen::Vector3d OBB_dimensions, Eigen::Vector3d center, double yaw);
-    std::vector<int> sortAABBDimensions(Eigen::Vector3d AABB_dimensions);
-    std::vector<Eigen::Vector3d> transformToWorldCoordinates(tf2_ros::Buffer &tf_buffer, Eigen::Vector3d OBB_dimensions, std::string source_frame, Eigen::Matrix4d transform);
 
     pcl::PointCloud<pcl::PointXYZ>::Ptr doPassThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, std::string axis, double min, double max);
     pcl::PointCloud<pcl::PointXYZ>::Ptr doPassThroughCubeCrop(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, pcl::PointXYZ pt, double radius);
