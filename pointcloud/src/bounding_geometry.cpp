@@ -52,8 +52,6 @@ BoundingBoxGeometry athena::pointcloud::obtainBoundingBoxGeomtry (pcl::PointClou
 // step 2 : if world pt has z-axis(x /y-axis) 0, then rotate it around OBB-axis corresponding to z-axis(x/y-axis).
 // step 3 : based on AABB dimension choose the biggest in x-y axis and find the angle b/w that OBB axis and the world X-axis which is nothing but yaw
 double athena::pointcloud::computeBoundingBoxYaw(Eigen::Matrix3f rotation_matrix, Eigen::Vector3d position, Eigen::Vector3d AABB_dimensions, Eigen::Vector3d OBB_dimensions) {
-  tf2_ros::Buffer *tf_buffer_ = new tf2_ros::Buffer;
-  tf2_ros::TransformListener *tf_listener_ = new tf2_ros::TransformListener(*tf_buffer_);
   tf::TransformBroadcaster br_;
   std::vector<Eigen::Vector3d> world_point;
 
