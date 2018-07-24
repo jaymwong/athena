@@ -178,18 +178,18 @@ geometry_msgs::Point athena::transform::eigen3d_vector_to_point(Eigen::Vector3d 
   return result;
 }
 
-void athena::transform::publish_matrix_as_tf(tf::TransformBroadcaster &br, Eigen::Matrix4d transformation_matrix, std::string source, std::string dest){
+void athena::transform::publish_matrix_as_tf(tf::TransformBroadcaster &br, Eigen::Matrix4d transformation_matrix, std::string root, std::string name){
   Eigen::Affine3d affine;
   affine.matrix() = transformation_matrix;
   tf::Transform t;
   tf::transformEigenToTF(affine, t);
   auto q = t.getRotation().normalize();
   t.setRotation(q);
-  br.sendTransform(tf::StampedTransform(t, ros::Time::now(), source, dest));
+  br.sendTransform(tf::StampedTransform(t, ros::Time::now(), root, name));
 }
 
-void athena::transform::publish_matrix_as_tf(tf::TransformBroadcaster &br, Eigen::Affine3d transformation_matrix, std::string source, std::string dest){
-  publish_matrix_as_tf(br, transformation_matrix.matrix(), source, dest);
+void athena::transform::publish_matrix_as_tf(tf::TransformBroadcaster &br, Eigen::Affine3d transformation_matrix, std::string root, std::string name){
+  publish_matrix_as_tf(br, transformation_matrix.matrix(), root, name);
 }
 
 Eigen::Matrix4d athena::transform::array_to_eigen4d_matrix(const float transform[]){

@@ -23,11 +23,20 @@ namespace athena{
   namespace pointcloud{
 
     void pointcloudToBGRImage(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &cloud, cv::Mat &coords, cv::Mat &image);
-    Eigen::Vector3d pclPointToEigenVector3d(pcl::PointXYZ pt);
-    Eigen::Vector3d toEigen(pcl::PointXYZ pt);
-    pcl::PointXYZ eigenVector3dToPclPoint(Eigen::Vector3d vec);
+
+    Eigen::Vector3d toEigenVector3d(pcl::PointXYZ pt);
+    Eigen::Vector3d toEigenVector3d(geometry_msgs::PoseStamped pt);
+
+    pcl::PointXYZ toPclPointXYZ(Eigen::Vector3d vec);
     pcl::PointXYZ toPclPointXYZ(geometry_msgs::PointStamped msg);
-    Eigen::Vector3d GeometryMsgsPoseStampedToeigenVector3d(geometry_msgs::PoseStamped pt);
+
+    geometry_msgs::Pose toGeometryMsgPose(pcl::PointXYZ pt);
+
+    sensor_msgs::PointCloud2 toSensorMsgPointCloud2(pcl::PointCloud<pcl::PointXYZ> pcl_cloud);
+    sensor_msgs::PointCloud2 toSensorMsgPointCloud2(pcl::PointCloud<pcl::PointXYZRGBA> pcl_cloud);
+
+    pcl::PointCloud<pcl::PointXYZ>::Ptr toPclPointCloudXYZ(const sensor_msgs::PointCloud2ConstPtr& input);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr toPclPointCloudXYZ(sensor_msgs::PointCloud2 input);
   };
 };
 

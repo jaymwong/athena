@@ -8,6 +8,7 @@
 namespace athena{
   namespace parsers{
     std::vector<double> to_std_vectord(std::string text);
+    std::string findSubstringInVector(std::vector<std::string> substrings, std::string name);
   };
 };
 
