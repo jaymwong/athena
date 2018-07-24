@@ -368,7 +368,7 @@ double athena::pointcloud::computeBoundingBoxYaw(Eigen::Matrix3f rotation_matrix
   projectionTransform.block<3,3>(0,0) = rotation_matrix;
   athena::transform::publish_matrix_as_tf(br_, projectionTransform.cast <double> (), "world", "obb_box_frame_without_translation");
 
-  world_point = transformToWorldCoordinates(*tf_buffer_ ,OBB_dimensions, "obb_box_frame_without_translation");
+  world_point = transformToWorldCoordinates(*tf_buffer_ ,OBB_dimensions, "obb_box_frame_without_translation", projectionTransform.cast <double> ());
 
   std::vector<int> index_sort = sortAABBDimensions(AABB_dimensions);
 
@@ -399,7 +399,7 @@ double athena::pointcloud::computeBoundingBoxYaw(Eigen::Matrix3f rotation_matrix
   **/
   athena::transform::publish_matrix_as_tf(br_, projectionTransform.cast <double> (), "world", "obb_box_corrected_frame_without_translation");
 
-  world_point = transformToWorldCoordinates(*tf_buffer_, OBB_dimensions, "obb_box_corrected_frame_without_translation");
+  world_point = transformToWorldCoordinates(*tf_buffer_, OBB_dimensions, "obb_box_corrected_frame_without_translation", projectionTransform.cast <double> ());
   projectionTransform.block<3,1>(0,3) = position.cast <float> ();
   athena::transform::publish_matrix_as_tf(br_, projectionTransform.cast <double> (), "world", "obb_box_corrected_frame");
 
@@ -471,12 +471,26 @@ std::vector<int> athena::pointcloud::sortAABBDimensions(Eigen::Vector3d AABB_dim
   return sorted_index;
 }
 
-std::vector<Eigen::Vector3d> athena::pointcloud::transformToWorldCoordinates(tf2_ros::Buffer &tf_buffer, Eigen::Vector3d OBB_dimensions, std::string source_frame) {
-  std::vector<Eigen::Vector3d> world_point;
+std::vector<Eigen::Vector3d> athena::pointcloud::transformToWorldCoordinates(tf2_ros::Buffer &tf_buffer, Eigen::Vector3d OBB_dimensions, std::string source_frame, Eigen::Matrix4d transform) {
+  std::vector<Eigen::Vector3d> world_point, calc_point;
+  Eigen::Vector3d pt1, pt2, pt3;
   geometry_msgs::PoseStamped p1, p2, p3;
   p1.pose.position.x = 0.5 * OBB_dimensions.x();
   p2.pose.position.y = 0.5 * OBB_dimensions.y();
   p3.pose.position.z = 0.5 * OBB_dimensions.z();
+  pt1.x() = 0.5 * OBB_dimensions.x();
+  pt1.y() = 0;
+  pt1.z() = 0;
+  pt2.y() = 0.5 * OBB_dimensions.y();
+  pt2.x() = 0;
+  pt2.z() = 0;
+  pt3.z() = 0.5 * OBB_dimensions.z();
+  pt3.y() = 0;
+  pt3.x() = 0;
+
+  calc_point.push_back(athena::transform::transform_point(transform, pt1));
+  calc_point.push_back(athena::transform::transform_point(transform, pt2));
+  calc_point.push_back(athena::transform::transform_point(transform, pt3));
 
   p1 = athena::transform::transform_point(tf_buffer, p1, source_frame, "world");
   p2 = athena::transform::transform_point(tf_buffer, p2, source_frame, "world");
@@ -486,5 +500,22 @@ std::vector<Eigen::Vector3d> athena::pointcloud::transformToWorldCoordinates(tf2
   world_point.push_back(GeometryMsgsPoseStampedToeigenVector3d(p2));
   world_point.push_back(GeometryMsgsPoseStampedToeigenVector3d(p3));
 
-  return world_point;
+  Eigen::Affine3d box_to_world_ = tf2::transformToEigen(tf_buffer.lookupTransform(source_frame, "world", ros::Time(0)));
+
+  std::cout << "Tf lookupTransform \n";
+  std::cout << box_to_world_.matrix() << "\n";
+  std::cout << "Transform inverse \n";
+  std::cout << transform << "\n";
+  std::cout << "Transform \n";
+  std::cout << transform.inverse() << "\n";
+
+ /**
+  std::cout << "Point 1 using tf : " << world_point[0].x() << " " << world_point[0].y() << " " << world_point[0].z() << "\n";
+  std::cout << "Point 1 without tf :" << calc_point[0].x() << " " << calc_point[0].y() << " " << calc_point[0].z() << "\n";
+  std::cout << "Point 2 using tf : " << world_point[1].x() << " " << world_point[1].y() << " " << world_point[1].z() << "\n";
+  std::cout << "Point 2 without tf :" << calc_point[1].x() << " " << calc_point[1].y() << " " << calc_point[1].z() << "\n";
+  std::cout << "Point 3 using tf : " << world_point[2].x() << " " << world_point[2].y() << " " << world_point[2].z() << "\n";
+  std::cout << "Point 3 without tf :" << calc_point[2].x() << " " << calc_point[2].y() << " " << calc_point[2].z() << "\n";
+ **/
+  return calc_point;
 }
