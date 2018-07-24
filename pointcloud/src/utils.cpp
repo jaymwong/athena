@@ -47,43 +47,6 @@ std::vector<double> athena::pointcloud::getMinAndMaxFromVector(std::vector<doubl
   return min_max;
 }
 
-// Computes the geometry (e.g. min and max displacements aloong the world coordinate frame) for a point cloud
-athena::pointcloud::ObjectGeometries* athena::pointcloud::computePointCloudGeometries(std::string obj_name, pcl::PointCloud<pcl::PointXYZ> cloud){
-  double min_x = kInfinity;
-  double max_x = -kInfinity;
-  double min_y = kInfinity;
-  double max_y = -kInfinity;
-  double min_z = kInfinity;
-  double max_z = -kInfinity;
-  for (int i = 0; i < cloud.size(); i++){
-    pcl::PointXYZ cloud_point = cloud.at(i);
-    if (cloud_point.x > max_x){ max_x = cloud_point.x; }
-    if (cloud_point.x < min_x){ min_x = cloud_point.x; }
-    if (cloud_point.y > max_y){ max_y = cloud_point.y; }
-    if (cloud_point.y < min_y){ min_y = cloud_point.y; }
-    if (cloud_point.z > max_z){ max_z = cloud_point.z; }
-    if (cloud_point.z < min_z){ min_z = cloud_point.z; }
-  }
-  athena::pointcloud::ObjectGeometries *obj_geometry = new athena::pointcloud::ObjectGeometries(obj_name, min_x, max_x, min_y, max_y, min_z, max_z);
-  return obj_geometry;
-}
-
-sensor_msgs::PointCloud2 athena::pointcloud::toSensorMsgPointCloud2(pcl::PointCloud<pcl::PointXYZ> pcl_cloud){
-  pcl::PCLPointCloud2 pcl_pc2;
-  pcl::toPCLPointCloud2(pcl_cloud, pcl_pc2);
-  sensor_msgs::PointCloud2 cloud_msg;
-  pcl_conversions::fromPCL(pcl_pc2, cloud_msg);
-  return cloud_msg;
-}
-
-sensor_msgs::PointCloud2 athena::pointcloud::toSensorMsgPointCloud2(pcl::PointCloud<pcl::PointXYZRGBA> pcl_cloud){
-  pcl::PCLPointCloud2 pcl_pc2;
-  pcl::toPCLPointCloud2(pcl_cloud, pcl_pc2);
-  sensor_msgs::PointCloud2 cloud_msg;
-  pcl_conversions::fromPCL(pcl_pc2, cloud_msg);
-  return cloud_msg;
-}
-
 // Helper function to directly publish a point cloud under the publisher with desired frame_id
 void athena::pointcloud::publishPointCloudXYZ(ros::Publisher pub, pcl::PointCloud<pcl::PointXYZ> &pcl_cloud, std::string frame_id){
   pcl::PCLPointCloud2 pcl_pc2;
@@ -262,23 +225,6 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr  athena::pointcloud::convertClusterToPointCl
   return cloud_extract_;
 }
 
-pcl::PointXYZ athena::pointcloud::eigenVectorToPclPointXYZ(Eigen::Vector3d vector){
-  pcl::PointXYZ result;
-  result.x = vector.x();
-  result.y = vector.y();
-  result.z = vector.z();
-  return result;
-}
-
- pcl::PointCloud<pcl::PointXYZ>::Ptr athena::pointcloud::sensorMsgToPclPointCloudXYZ(const sensor_msgs::PointCloud2ConstPtr& input){
-  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = pcl::PointCloud<pcl::PointXYZ>::Ptr(new pcl::PointCloud<pcl::PointXYZ>);
-  pcl::PCLPointCloud2* input_cloud_pcl = new pcl::PCLPointCloud2;
-  pcl::PCLPointCloud2ConstPtr cloudPtr(input_cloud_pcl);
-  pcl_conversions::toPCL(*input, *input_cloud_pcl);
-  pcl::fromPCLPointCloud2(*input_cloud_pcl, *cloud);
-  return cloud;
-}
-
 pcl::PointCloud<pcl::PointXYZ>::Ptr athena::pointcloud::doNeighborRadiusSearch(pcl::PointXYZ searchPoint, pcl::KdTreeFLANN<pcl::PointXYZ> kd_tree_flann,
                                                                              pcl::PointCloud<pcl::PointXYZ>::Ptr raw_cloud, double radius)
 {
@@ -302,15 +248,6 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr athena::pointcloud::doNeighborRadiusSearch(p
    return extracted_cloud;
 }
 
-geometry_msgs::Pose athena::pointcloud::pclPointXYZToGeometryMsgPose(pcl::PointXYZ pt){
-  geometry_msgs::Pose pose;
-  pose.position.x = pt.x;
-  pose.position.y = pt.y;
-  pose.position.z = pt.z;
-  pose.orientation.w = 1.0;
-  return pose;
-}
-
 BoundingBoxGeometry athena::pointcloud::obtainBoundingBoxGeomtry (pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud, ros::Publisher pub_transformed_cloud) {
   pcl::PointCloud<pcl::PointXYZ>::Ptr transformed_cloud = pcl::PointCloud<pcl::PointXYZ>::Ptr(new pcl::PointCloud<pcl::PointXYZ>);
   BoundingBoxGeometry box_geometry;
@@ -326,11 +263,11 @@ BoundingBoxGeometry athena::pointcloud::obtainBoundingBoxGeomtry (pcl::PointClou
   feature_extractor.getAABB(min_point_AABB, max_point_AABB);
   feature_extractor.getOBB(min_point_OBB, max_point_OBB, position_OBB, rotational_matrix_OBB);
 
-  auto obb_min_point = athena::pointcloud::pclPointToEigenVector3d(min_point_OBB);
-  auto obb_max_point = athena::pointcloud::pclPointToEigenVector3d(max_point_OBB);
-  auto aabb_min_point = athena::pointcloud::pclPointToEigenVector3d(min_point_AABB);
-  auto aabb_max_point = athena::pointcloud::pclPointToEigenVector3d(max_point_AABB);
-  auto position = athena::pointcloud::pclPointToEigenVector3d(position_OBB);
+  auto obb_min_point = athena::pointcloud::toEigenVector3d(min_point_OBB);
+  auto obb_max_point = athena::pointcloud::toEigenVector3d(max_point_OBB);
+  auto aabb_min_point = athena::pointcloud::toEigenVector3d(min_point_AABB);
+  auto aabb_max_point = athena::pointcloud::toEigenVector3d(max_point_AABB);
+  auto position = athena::pointcloud::toEigenVector3d(position_OBB);
 
   box_geometry.AABB_dimensions = aabb_max_point - aabb_min_point;
   box_geometry.OBB_dimensions = obb_max_point - obb_min_point;
@@ -347,8 +284,8 @@ BoundingBoxGeometry athena::pointcloud::obtainBoundingBoxGeomtry (pcl::PointClou
   pcl::transformPointCloud(*transformed_cloud, *transformed_cloud, athena::transform::translation_matrix(position[0], position[1], position[2]));
   publishPointCloudXYZ(pub_transformed_cloud, *transformed_cloud, "world");
   pcl::getMinMax3D (*transformed_cloud, min_point_world, max_point_world);
-  auto min_point = athena::pointcloud::pclPointToEigenVector3d(min_point_world);
-  auto max_point = athena::pointcloud::pclPointToEigenVector3d(max_point_world);
+  auto min_point = athena::pointcloud::toEigenVector3d(min_point_world);
+  auto max_point = athena::pointcloud::toEigenVector3d(max_point_world);
   box_geometry.OBB_dimensions = max_point - min_point;
   auto centre_diagonal = 0.5 * (min_point + max_point);
 
@@ -485,9 +422,9 @@ std::vector<Eigen::Vector3d> athena::pointcloud::transformToWorldCoordinates(tf2
   p2 = athena::transform::transform_point(tf_buffer, p2, source_frame, "world");
   p3 = athena::transform::transform_point(tf_buffer, p3, source_frame, "world");
 
-  world_point.push_back(GeometryMsgsPoseStampedToeigenVector3d(p1));
-  world_point.push_back(GeometryMsgsPoseStampedToeigenVector3d(p2));
-  world_point.push_back(GeometryMsgsPoseStampedToeigenVector3d(p3));
+  world_point.push_back(toEigenVector3d(p1));
+  world_point.push_back(toEigenVector3d(p2));
+  world_point.push_back(toEigenVector3d(p3));
 
   return world_point;
 }
