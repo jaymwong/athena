@@ -25,7 +25,7 @@ void athena::pointcloud::pointcloudToBGRImage(const pcl::PointCloud<pcl::PointXY
   }
 }
 
-Eigen::Vector3d athena::pointcloud::toEigenVector3d(pcl::PointXYZ pt){
+Eigen::Vector3d athena::conversions::toEigenVector3d(pcl::PointXYZ pt){
   Eigen::Vector3d vec;
   vec.x() = pt.x;
   vec.y() = pt.y;
@@ -33,15 +33,7 @@ Eigen::Vector3d athena::pointcloud::toEigenVector3d(pcl::PointXYZ pt){
   return vec;
 }
 
-Eigen::Vector3d athena::pointcloud::toEigenVector3d(geometry_msgs::PoseStamped pt) {
-  Eigen::Vector3d point;
-  point.x() = pt.pose.position.x;
-  point.y() = pt.pose.position.y;
-  point.z() = pt.pose.position.z;
-  return point;
-}
-
-pcl::PointXYZ athena::pointcloud::toPclPointXYZ(Eigen::Vector3d vec){
+pcl::PointXYZ athena::conversions::toPclPointXYZ(Eigen::Vector3d vec){
   pcl::PointXYZ pt;
   pt.x = vec.x();
   pt.y = vec.y();
@@ -49,12 +41,12 @@ pcl::PointXYZ athena::pointcloud::toPclPointXYZ(Eigen::Vector3d vec){
   return pt;
 }
 
-pcl::PointXYZ athena::pointcloud::toPclPointXYZ(geometry_msgs::PointStamped msg){
+pcl::PointXYZ athena::conversions::toPclPointXYZ(geometry_msgs::PointStamped msg){
   pcl::PointXYZ pt (msg.point.x, msg.point.y, msg.point.z);
   return pt;
 }
 
-sensor_msgs::PointCloud2 athena::pointcloud::toSensorMsgPointCloud2(pcl::PointCloud<pcl::PointXYZ> pcl_cloud){
+sensor_msgs::PointCloud2 athena::conversions::toSensorMsgPointCloud2(pcl::PointCloud<pcl::PointXYZ> pcl_cloud){
   pcl::PCLPointCloud2 pcl_pc2;
   pcl::toPCLPointCloud2(pcl_cloud, pcl_pc2);
   sensor_msgs::PointCloud2 cloud_msg;
@@ -62,7 +54,7 @@ sensor_msgs::PointCloud2 athena::pointcloud::toSensorMsgPointCloud2(pcl::PointCl
   return cloud_msg;
 }
 
-sensor_msgs::PointCloud2 athena::pointcloud::toSensorMsgPointCloud2(pcl::PointCloud<pcl::PointXYZRGBA> pcl_cloud){
+sensor_msgs::PointCloud2 athena::conversions::toSensorMsgPointCloud2(pcl::PointCloud<pcl::PointXYZRGBA> pcl_cloud){
   pcl::PCLPointCloud2 pcl_pc2;
   pcl::toPCLPointCloud2(pcl_cloud, pcl_pc2);
   sensor_msgs::PointCloud2 cloud_msg;
@@ -70,7 +62,7 @@ sensor_msgs::PointCloud2 athena::pointcloud::toSensorMsgPointCloud2(pcl::PointCl
   return cloud_msg;
 }
 
-pcl::PointCloud<pcl::PointXYZ>::Ptr athena::pointcloud::toPclPointCloudXYZ(const sensor_msgs::PointCloud2ConstPtr& input){
+pcl::PointCloud<pcl::PointXYZ>::Ptr athena::conversions::toPclPointCloudXYZ(const sensor_msgs::PointCloud2ConstPtr& input){
  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = pcl::PointCloud<pcl::PointXYZ>::Ptr(new pcl::PointCloud<pcl::PointXYZ>);
  pcl::PCLPointCloud2* input_cloud_pcl = new pcl::PCLPointCloud2;
  pcl::PCLPointCloud2ConstPtr cloudPtr(input_cloud_pcl);
@@ -79,7 +71,7 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr athena::pointcloud::toPclPointCloudXYZ(const
  return cloud;
 }
 
-pcl::PointCloud<pcl::PointXYZ>::Ptr athena::pointcloud::toPclPointCloudXYZ(sensor_msgs::PointCloud2 input){
+pcl::PointCloud<pcl::PointXYZ>::Ptr athena::conversions::toPclPointCloudXYZ(sensor_msgs::PointCloud2 input){
  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = pcl::PointCloud<pcl::PointXYZ>::Ptr(new pcl::PointCloud<pcl::PointXYZ>);
  pcl::PCLPointCloud2* input_cloud_pcl = new pcl::PCLPointCloud2;
  pcl::PCLPointCloud2ConstPtr cloudPtr(input_cloud_pcl);
@@ -88,7 +80,7 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr athena::pointcloud::toPclPointCloudXYZ(senso
  return cloud;
 }
 
-geometry_msgs::Pose athena::pointcloud::toGeometryMsgPose(pcl::PointXYZ pt){
+geometry_msgs::Pose athena::conversions::toGeometryMsgPose(pcl::PointXYZ pt){
   geometry_msgs::Pose pose;
   pose.position.x = pt.x;
   pose.position.y = pt.y;

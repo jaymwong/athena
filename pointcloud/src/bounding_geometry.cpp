@@ -16,11 +16,11 @@ BoundingBoxGeometry athena::pointcloud::obtainBoundingBoxGeomtry (pcl::PointClou
   feature_extractor.getAABB(min_point_AABB, max_point_AABB);
   feature_extractor.getOBB(min_point_OBB, max_point_OBB, position_OBB, rotational_matrix_OBB);
 
-  auto obb_min_point = athena::pointcloud::toEigenVector3d(min_point_OBB);
-  auto obb_max_point = athena::pointcloud::toEigenVector3d(max_point_OBB);
-  auto aabb_min_point = athena::pointcloud::toEigenVector3d(min_point_AABB);
-  auto aabb_max_point = athena::pointcloud::toEigenVector3d(max_point_AABB);
-  auto position = athena::pointcloud::toEigenVector3d(position_OBB);
+  auto obb_min_point = athena::conversions::toEigenVector3d(min_point_OBB);
+  auto obb_max_point = athena::conversions::toEigenVector3d(max_point_OBB);
+  auto aabb_min_point = athena::conversions::toEigenVector3d(min_point_AABB);
+  auto aabb_max_point = athena::conversions::toEigenVector3d(max_point_AABB);
+  auto position = athena::conversions::toEigenVector3d(position_OBB);
 
   box_geometry.AABB_dimensions = aabb_max_point - aabb_min_point;
   box_geometry.OBB_dimensions = obb_max_point - obb_min_point;
@@ -37,8 +37,8 @@ BoundingBoxGeometry athena::pointcloud::obtainBoundingBoxGeomtry (pcl::PointClou
   pcl::transformPointCloud(*transformed_cloud, *transformed_cloud, athena::transform::translation_matrix(position[0], position[1], position[2]));
   athena::pointcloud::publishPointCloudXYZ(pub_transformed_cloud, *transformed_cloud, "world");
   pcl::getMinMax3D (*transformed_cloud, min_point_world, max_point_world);
-  auto min_point = athena::pointcloud::toEigenVector3d(min_point_world);
-  auto max_point = athena::pointcloud::toEigenVector3d(max_point_world);
+  auto min_point = athena::conversions::toEigenVector3d(min_point_world);
+  auto max_point = athena::conversions::toEigenVector3d(max_point_world);
   box_geometry.OBB_dimensions = max_point - min_point;
   auto centre_diagonal = 0.5 * (min_point + max_point);
 

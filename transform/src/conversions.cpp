@@ -1,6 +1,6 @@
 #include "athena/transform/conversions.h"
 
-tf::Transform athena::transform::pose_stamped_msg_to_tf(geometry_msgs::PoseStamped pose_msg){
+tf::Transform athena::conversions::toTfTransform(geometry_msgs::PoseStamped pose_msg){
   tf::Transform transform_result;
   transform_result.setOrigin(tf::Vector3(pose_msg.pose.position.x, pose_msg.pose.position.y, pose_msg.pose.position.z));
   transform_result.setRotation(tf::Quaternion( pose_msg.pose.position.x, pose_msg.pose.orientation.y, pose_msg.pose.orientation.z, pose_msg.pose.orientation.w));
@@ -131,7 +131,7 @@ Eigen::Vector3d athena::transform::diff_vector(Eigen::Vector3d v1, std::vector<d
   return result;
 }
 
-boost::array<double, 3> athena::transform::to_boost_arrayd(Eigen::Vector3d vec){
+boost::array<double, 3> athena::conversions::toBoostArray3d(Eigen::Vector3d vec){
   boost::array<double, 3> result;
   result[0] = vec.x();
   result[1] = vec.y();
@@ -139,7 +139,7 @@ boost::array<double, 3> athena::transform::to_boost_arrayd(Eigen::Vector3d vec){
   return result;
 }
 
-std::vector<float> athena::transform::to_std_vectorf(Eigen::Vector3d mat){
+std::vector<float> athena::conversions::toStdVectorf(Eigen::Vector3d mat){
   std::vector<float> vec(mat.data(), mat.data() + mat.rows() * mat.cols());
   return vec;
 }
@@ -170,7 +170,7 @@ Eigen::Vector3d athena::transform::euler_from_rotation(Eigen::Matrix3d rot){
   return rot.eulerAngles(0, 1, 2);
 }
 
-geometry_msgs::Point athena::transform::eigen3d_vector_to_point(Eigen::Vector3d vec){
+geometry_msgs::Point athena::conversions::toGeometryMsgPoint(Eigen::Vector3d vec){
   geometry_msgs::Point result;
   result.x = vec.x();
   result.y = vec.y();
@@ -192,7 +192,7 @@ void athena::transform::publish_matrix_as_tf(tf::TransformBroadcaster &br, Eigen
   publish_matrix_as_tf(br, transformation_matrix.matrix(), root, name);
 }
 
-Eigen::Matrix4d athena::transform::array_to_eigen4d_matrix(const float transform[]){
+Eigen::Matrix4d athena::conversions::toEigenMatrix4d(const float transform[]){
   Eigen::MatrixXd obj_pose;
   obj_pose.resize(HOMOGENOUS_TRANFORM_ELEMENTS, 1);
   for (int i = 0; i < HOMOGENOUS_TRANFORM_ELEMENTS; i++){
@@ -209,7 +209,7 @@ Eigen::Matrix4d athena::transform::array_to_eigen4d_matrix(const float transform
   return obj_pose;
 }
 
-geometry_msgs::Pose athena::transform::to_geometry_msg_pose(Eigen::Vector3d vec){
+geometry_msgs::Pose athena::conversions::toGeometryMsgPose(Eigen::Vector3d vec){
   geometry_msgs::Pose pose;
   pose.position.x = vec.x();
   pose.position.y = vec.y();
@@ -218,16 +218,16 @@ geometry_msgs::Pose athena::transform::to_geometry_msg_pose(Eigen::Vector3d vec)
   return pose;
 }
 
-Eigen::Vector3d athena::transform::to_eigen_vector3d(geometry_msgs::Pose pose){
+Eigen::Vector3d athena::conversions::toEigenVector3d(geometry_msgs::Pose pose){
   Eigen::Vector3d vec(pose.position.x, pose.position.y, pose.position.z);
   return vec;
 }
-Eigen::VectorXd athena::transform::to_eigen_vectorXd(std::vector<double> input){
+Eigen::VectorXd athena::conversions::toEigenVectorXd(std::vector<double> input){
   Eigen::VectorXd v = Eigen::Map<Eigen::VectorXd, Eigen::Unaligned>(input.data(), input.size());
   return v;
 }
 
-Eigen::Matrix4d athena::transform::array_to_eigen4d_matrix(const double transform[]){
+Eigen::Matrix4d athena::conversions::toEigenMatrix4d(const double transform[]){
   Eigen::MatrixXd obj_pose;
   obj_pose.resize(HOMOGENOUS_TRANFORM_ELEMENTS, 1);
   for (int i = 0; i < HOMOGENOUS_TRANFORM_ELEMENTS; i++){
@@ -244,7 +244,7 @@ Eigen::Matrix4d athena::transform::array_to_eigen4d_matrix(const double transfor
   return obj_pose;
 }
 
-boost::array<double, HOMOGENOUS_TRANFORM_ELEMENTS> athena::transform::eigen4d_matrix_to_array(Eigen::Matrix4d transform){
+boost::array<double, HOMOGENOUS_TRANFORM_ELEMENTS> athena::conversions::toBoostArrayd(Eigen::Matrix4d transform){
   boost::array<double, HOMOGENOUS_TRANFORM_ELEMENTS> transform_array;
   Eigen::MatrixXd resize_transform = transform;
   resize_transform.resize(1, HOMOGENOUS_TRANFORM_ELEMENTS);
@@ -319,7 +319,15 @@ double athena::transform::findstd(std::vector<double> val, double mean) {
   return findmean(diff);
 }
 
-std::string athena::transform::toString(Eigen::Vector3d vec){
+Eigen::Vector3d athena::conversions::toEigenVector3d(geometry_msgs::PoseStamped pt) {
+  Eigen::Vector3d point;
+  point.x() = pt.pose.position.x;
+  point.y() = pt.pose.position.y;
+  point.z() = pt.pose.position.z;
+  return point;
+}
+
+std::string athena::conversions::toString(Eigen::Vector3d vec){
   std::string result = "";
   result = result + std::to_string(vec.x()) + " " + std::to_string(vec.y()) + " " + std::to_string(vec.z());
   return result;
