@@ -43,7 +43,6 @@ BoundingBoxGeometry athena::pointcloud::obtainBoundingBoxGeomtry (pcl::PointClou
   auto centre_diagonal = 0.5 * (min_point + max_point);
 
   box_geometry.bounding_box = createVisualizationMarker(box_geometry.OBB_dimensions, centre_diagonal, box_geometry.yaw);
-
   return box_geometry;
 }
 
