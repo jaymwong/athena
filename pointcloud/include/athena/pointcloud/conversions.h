@@ -34,6 +34,7 @@ namespace athena{
     pcl::PointXYZ toPclPointXYZ(geometry_msgs::PointStamped msg);
 
     sensor_msgs::PointCloud2 toSensorMsgPointCloud2(pcl::PointCloud<pcl::PointXYZ> pcl_cloud);
+    sensor_msgs::PointCloud2 toSensorMsgPointCloud2(pcl::PointCloud<pcl::PointXYZRGB> pcl_cloud);
     sensor_msgs::PointCloud2 toSensorMsgPointCloud2(pcl::PointCloud<pcl::PointXYZRGBA> pcl_cloud);
 
     pcl::PointCloud<pcl::PointXYZ>::Ptr toPclPointCloudXYZ(const sensor_msgs::PointCloud2ConstPtr& input);

@@ -54,6 +54,14 @@ sensor_msgs::PointCloud2 athena::conversions::toSensorMsgPointCloud2(pcl::PointC
   return cloud_msg;
 }
 
+sensor_msgs::PointCloud2 athena::conversions::toSensorMsgPointCloud2(pcl::PointCloud<pcl::PointXYZRGB> pcl_cloud){
+  pcl::PCLPointCloud2 pcl_pc2;
+  pcl::toPCLPointCloud2(pcl_cloud, pcl_pc2);
+  sensor_msgs::PointCloud2 cloud_msg;
+  pcl_conversions::fromPCL(pcl_pc2, cloud_msg);
+  return cloud_msg;
+}
+
 sensor_msgs::PointCloud2 athena::conversions::toSensorMsgPointCloud2(pcl::PointCloud<pcl::PointXYZRGBA> pcl_cloud){
   pcl::PCLPointCloud2 pcl_pc2;
   pcl::toPCLPointCloud2(pcl_cloud, pcl_pc2);
