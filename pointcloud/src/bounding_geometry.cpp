@@ -1,6 +1,6 @@
 #include "athena/pointcloud/bounding_geometry.h"
 
-BoundingBoxGeometry athena::pointcloud::obtainBoundingBoxGeomtry (pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud, ros::Publisher pub_transformed_cloud) {
+BoundingBoxGeometry athena::pointcloud::obtainBoundingBoxGeometry (pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud, ros::Publisher pub_transformed_cloud) {
   pcl::PointCloud<pcl::PointXYZ>::Ptr transformed_cloud = pcl::PointCloud<pcl::PointXYZ>::Ptr(new pcl::PointCloud<pcl::PointXYZ>);
   BoundingBoxGeometry box_geometry;
   pcl::PointXYZ min_point_OBB, max_point_OBB, min_point_AABB, max_point_AABB;
