@@ -62,6 +62,8 @@ double athena::pointcloud::computeBoundingBoxYaw(Eigen::Matrix3f rotation_matrix
 
   Eigen::Matrix4f projectionTransform(Eigen::Matrix4f::Identity());
   projectionTransform.block<3,3>(0,0) = rotation_matrix;
+  std::cout << "Rotation matrix: " << rotation_matrix << "\n";
+  std::cout << "euler" << athena::transform::euler_from_matrix(projectionTransform.cast <double> ()) << "\n";
 
   world_point = transformToWorldCoordinates(OBB_dimensions, projectionTransform.cast <double> ());
   std::vector<int> index_sort = sortAABBDimensions(AABB_dimensions);
@@ -89,7 +91,13 @@ double athena::pointcloud::computeBoundingBoxYaw(Eigen::Matrix3f rotation_matrix
   std::vector<Eigen::Vector3d> point1, point2;
   double value1, value2;
 
+  std::cout << "OBB" << OBB_dimensions << "\n";
+  std::cout << "AABB" << AABB_dimensions << "\n";
+
+  std::cout << projectionTransform.cast <double> () << "\n";
   possibleTransform1 = rotateFrameAlongWorldX(OBB_dimensions, AABB_dimensions, projectionTransform.cast <double> (), z_world);
+  std::cout << "Possible transform: " << possibleTransform1 << "\n";
+  std::cout << "Inv Possible transform: " << possibleTransform1.inverse() << "\n";
   point1 = transformToWorldCoordinates(OBB_dimensions, possibleTransform1.cast <double> ());
   std::cout << "Point 1: " << point1[0] << "\n";
   std::cout << "Point 1: " << point1[1] << "\n";
@@ -202,8 +210,13 @@ std::vector<int> athena::pointcloud::sortAABBDimensions(Eigen::Vector3d AABB_dim
 }
 
 std::vector<Eigen::Vector3d> athena::pointcloud::transformToWorldCoordinates(Eigen::Vector3d OBB_dimensions, Eigen::Matrix4d transform) {
+  std::cout << "***************** In transformToWorldCoordinates *******\n";
   std::vector<Eigen::Vector3d> world_point;
-  Eigen::Vector3d pt1, pt2, pt3;
+  Eigen::Vector3d pt1(0.0, 0.0, 0.0);
+  Eigen::Vector3d pt2(0.0, 0.0, 0.0);
+  Eigen::Vector3d pt3(0.0, 0.0, 0.0);
+
+  std::cout << "My TRANSFORM: " << transform << "\n";
 
   pt1.x() = 0.5 * OBB_dimensions.x();
   pt2.y() = 0.5 * OBB_dimensions.y();
@@ -217,6 +230,12 @@ std::vector<Eigen::Vector3d> athena::pointcloud::transformToWorldCoordinates(Eig
 }
 
 Eigen::Matrix4f athena::pointcloud::rotateFrameAlongWorldX(Eigen::Vector3d OBB_dimensions, Eigen::Vector3d AABB_dimensions, Eigen::Matrix4d transform, double angle) {
+  // Eigen::Matrix4d transform = transform1.cast<double>();
+
+  std::cout << "**** Inside rotate in world \n";
+  std::cout << transform << "\n";
+  std::cout << "***\n";
+  std::cout << transform.inverse() << "\n";
   auto world_point = transformToWorldCoordinates(OBB_dimensions, transform);
   auto index_sort = sortAABBDimensions(AABB_dimensions);
   if ((world_point[index_sort[2]].y() > 0 && world_point[index_sort[0]].x() > 0) ||
