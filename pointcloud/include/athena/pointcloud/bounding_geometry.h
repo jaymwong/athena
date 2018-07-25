@@ -38,6 +38,8 @@
 #include <athena_pointcloud/CloudGeometries.h>
 
 #include "athena/pointcloud/conversions.h"
+#include "athena/pointcloud/utils.h"
+#include "athena/pointcloud/planar.h"
 
 struct BoundingBoxGeometry {
   Eigen::Vector3d AABB_dimensions;
@@ -54,6 +56,8 @@ namespace athena {
     double computeBoundingBoxYaw(Eigen::Matrix3f rotation_matrix, Eigen::Vector3d position, Eigen::Vector3d AABB_dimensions, Eigen::Vector3d OBB_dimensions);
     visualization_msgs::Marker createVisualizationMarker(Eigen::Vector3d OBB_dimensions, Eigen::Vector3d center, double yaw);
     std::vector<int> sortAABBDimensions(Eigen::Vector3d AABB_dimensions);
+    Eigen::Matrix4f rotateFrameAlongWorldX(Eigen::Vector3d OBB_dimensions, Eigen::Vector3d AABB_dimensions, Eigen::Matrix4d transform, double angle);
+    Eigen::Matrix4f rotateFrameAlongWorldY(Eigen::Vector3d OBB_dimensions, Eigen::Vector3d AABB_dimensions, Eigen::Matrix4d transform, double angle);
     std::vector<Eigen::Vector3d> transformToWorldCoordinates(Eigen::Vector3d OBB_dimensions, Eigen::Matrix4d transform);
   };
 };
