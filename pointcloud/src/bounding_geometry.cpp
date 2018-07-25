@@ -22,6 +22,11 @@ BoundingBoxGeometry athena::pointcloud::obtainBoundingBoxGeomtry (pcl::PointClou
   auto aabb_max_point = athena::conversions::toEigenVector3d(max_point_AABB);
   auto position = athena::conversions::toEigenVector3d(position_OBB);
 
+  std::cout << "OBB min: " << obb_min_point << "\n";
+  std::cout << "OBB max: " << obb_max_point << "\n";
+  std::cout << "AABB min: " << aabb_min_point << "\n";
+  std::cout << "AABB max: " << aabb_max_point << "\n";
+
   box_geometry.AABB_dimensions = aabb_max_point - aabb_min_point;
   box_geometry.OBB_dimensions = obb_max_point - obb_min_point;
 
@@ -30,7 +35,10 @@ BoundingBoxGeometry athena::pointcloud::obtainBoundingBoxGeomtry (pcl::PointClou
   projectionTransform.block<3,1>(0,3) = position.cast <float> ();
   box_geometry.transformation_world_to_OBB.matrix() = projectionTransform.cast <double> ();
 
+  std::cout << "matrix: " << box_geometry.transformation_world_to_OBB.matrix() << "\n";
+
   box_geometry.yaw  = computeBoundingBoxYaw(rotational_matrix_OBB, position, box_geometry.AABB_dimensions, box_geometry.OBB_dimensions);
+  std::cout << "yaw: " << box_geometry.yaw << "\n";
 
   pcl::transformPointCloud(*input_cloud, *transformed_cloud, athena::transform::translation_matrix(-position[0], -position[1], -position[2]));
   pcl::transformPointCloud(*transformed_cloud, *transformed_cloud, athena::transform::euler_matrix(0, 0, -box_geometry.yaw * M_PI / 180));
