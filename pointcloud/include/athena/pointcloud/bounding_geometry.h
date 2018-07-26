@@ -49,15 +49,29 @@ struct BoundingBoxGeometry {
   visualization_msgs::Marker bounding_box;
 };
 
+struct BoundingRequest{
+  bool filter_yaw;
+  double min_lw_ratio;
+  double max_lw_ratio;
+  double min_length;
+};
+
 namespace athena {
   namespace pointcloud{
     Eigen::Vector3d computePointCloudBoundingBoxOrigin(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud);
-    BoundingBoxGeometry obtainBoundingBoxGeometry (pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud, ros::Publisher pub_transformed_cloud);
+    // populates the bounding box geometry parameters by callling helper functions.
+    BoundingBoxGeometry obtainBoundingBoxGeometry (pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud, ros::Publisher pub_transformed_cloud, BoundingRequest req_params);
+    // computes the yaw by aligning the bounding box frame with the world frame and finding the angle between world-X and corresponding box axis
     double computeBoundingBoxYaw(Eigen::Matrix3f rotation_matrix, Eigen::Vector3d position, Eigen::Vector3d AABB_dimensions, Eigen::Vector3d OBB_dimensions);
+    // populates the parameters in visulaization marker using the yaw and box dimensions
     visualization_msgs::Marker createVisualizationMarker(Eigen::Vector3d OBB_dimensions, Eigen::Vector3d center, double yaw);
+    // sorts the axis-aligned(world-aligned) bounding box dimensions and returns a vector with the index corresponding to the rank of X, Y and Z axis in decreasing order
     std::vector<int> sortAABBDimensions(Eigen::Vector3d AABB_dimensions);
+    // rotates the box frame along the axis that is parallel/corresponds to world X-axis by the specified angle
     Eigen::Matrix4f rotateFrameAlongWorldX(Eigen::Vector3d OBB_dimensions, Eigen::Vector3d AABB_dimensions, Eigen::Matrix4d transform, double angle);
+    // rotates the box frame along the axis that is parallel/corresponds to world Y-axis by the specified angle
     Eigen::Matrix4f rotateFrameAlongWorldY(Eigen::Vector3d OBB_dimensions, Eigen::Vector3d AABB_dimensions, Eigen::Matrix4d transform, double angle);
+    // transform a point in box frame to world frame
     std::vector<Eigen::Vector3d> transformToWorldCoordinates(Eigen::Vector3d OBB_dimensions, Eigen::Matrix4d transform);
   };
 };
