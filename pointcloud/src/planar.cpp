@@ -21,6 +21,7 @@ athena::pointcloud::ClosestPointResult athena::pointcloud::PlanarModel::getClose
   result.pt.y() = point.y() - (k*this->b);
   result.pt.z() = point.z() - (k*this->c);
   result.distance = (result.pt - point).norm();
+  result.signed_distance = getPointRelativeDirection(point)*result.distance;
   pcl::PointXYZ pcl_pt(result.pt.x(), result.pt.y(), result.pt.z());
   result.pcl_pt = pcl_pt;
   return result;

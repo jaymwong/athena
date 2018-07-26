@@ -10,9 +10,6 @@ visualization_msgs::Marker athena::visualization::createMarkerFromPoint(Eigen::V
   marker.pose.position.x = point.x();
   marker.pose.position.y = point.y();
   marker.pose.position.z = point.z();
-  marker.pose.orientation.x = 0.0;
-  marker.pose.orientation.y = 0.0;
-  marker.pose.orientation.z = 0.0;
   marker.pose.orientation.w = 1.0;
   marker.scale.x = size;
   marker.scale.y = size;
@@ -31,6 +28,15 @@ visualization_msgs::MarkerArray athena::visualization::createMarkersFromPoints(s
     marker_array.markers.push_back(createMarkerFromPoint(points.at(i), i, frame, size));
   }
   return marker_array;
+}
+
+std_msgs::ColorRGBA athena::visualization::toColorRGBA(double r, double g, double b, double a){
+  std_msgs::ColorRGBA color;
+  color.r = r;
+  color.g = g;
+  color.b = b;
+  color.a = a;
+  return color;
 }
 
 visualization_msgs::Marker athena::visualization::createBoundingBoxMarker(int id, Eigen::Vector3f point, Eigen::Quaternionf quat, Eigen::Vector3f size, std::string frame){

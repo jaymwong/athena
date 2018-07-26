@@ -3,6 +3,7 @@
 
 #include <geometry_msgs/PointStamped.h>
 #include <geometry_msgs/PoseStamped.h>
+#include <geometry_msgs/PoseArray.h>
 
 #include <tf/transform_datatypes.h>
 #include <tf/transform_listener.h>
@@ -25,10 +26,28 @@ struct Matrix4dStatistics {
 };
 
 namespace athena{
-  namespace transform{
 
-    // Various conversions
-    tf::Transform pose_stamped_msg_to_tf(geometry_msgs::PoseStamped pose);
+  namespace conversions{
+    Eigen::Matrix4d toEigenMatrix4d(const double transform[]);
+    Eigen::Matrix4d toEigenMatrix4d(const float transform[]);
+
+    geometry_msgs::Pose toGeometryMsgPose(Eigen::Vector3d vec);
+    geometry_msgs::Point toGeometryMsgPoint(Eigen::Vector3d vec);
+
+    Eigen::Vector3d toEigenVector3d(geometry_msgs::Pose pose);
+    Eigen::Vector3d toEigenVector3d(geometry_msgs::PoseStamped pt);
+    Eigen::VectorXd toEigenVectorXd(std::vector<double> input);
+
+    boost::array<double, HOMOGENOUS_TRANFORM_ELEMENTS> toBoostArrayd(Eigen::Matrix4d transform);
+    boost::array<double, 3> toBoostArray3d(Eigen::Vector3d vec);
+    std::vector<float> toStdVectorf(Eigen::Vector3d mat);
+
+    tf::Transform toTfTransform(geometry_msgs::PoseStamped pose);
+
+    std::string toString(Eigen::Vector3d vec);
+  };
+
+  namespace transform{
 
     // Various ways to transform poses or points
     geometry_msgs::PointStamped transform_point(tf2_ros::Buffer &tf_buffer, geometry_msgs::PointStamped point, std::string target_frame);
@@ -55,30 +74,16 @@ namespace athena{
     Eigen::Matrix4d euler_matrix(Eigen::Vector3d rpy);
     Eigen::Matrix4d quaternion_matrix(double x, double y, double z, double w);
 
-    geometry_msgs::Point eigen3d_vector_to_point(Eigen::Vector3d vec);
-
-    Eigen::Matrix4d array_to_eigen4d_matrix(const double transform[]);
-    Eigen::Matrix4d array_to_eigen4d_matrix(const float transform[]);
-
     Eigen::Vector3d compute_midpoint(Eigen::Vector3d vec1, Eigen::Vector3d vec2);
     Eigen::Vector3d transform_point(Eigen::Matrix4d transform, Eigen::Vector3d pt);
     Eigen::Matrix4d set_translation(Eigen::Matrix4d mat, Eigen::Vector3d vec);
 
-    boost::array<double, HOMOGENOUS_TRANFORM_ELEMENTS> eigen4d_matrix_to_array(Eigen::Matrix4d transform);
-    boost::array<double, 3> to_boost_arrayd(Eigen::Vector3d vec);
-    std::vector<float> to_std_vectorf(Eigen::Vector3d mat);
     Eigen::Vector3d diff_vector(Eigen::Vector3d v1, std::vector<double> v2);
-
-    geometry_msgs::Pose to_geometry_msg_pose(Eigen::Vector3d vec);
-    Eigen::Vector3d to_eigen_vector3d(geometry_msgs::Pose pose);
-    Eigen::VectorXd to_eigen_vectorXd(std::vector<double> input);
 
     Matrix4dStatistics compute_transform_statistics(std::vector<Eigen::Matrix4d> transforms);
     double findmean(std::vector<double> val);
     double findmedian(std::vector<double> val);
     double findstd(std::vector<double> val, double mean);
-
-    std::string toString(Eigen::Vector3d vec);
   };
 };
 

@@ -11,7 +11,7 @@ namespace athena{
     struct ClosestPointResult{
       Eigen::Vector3d pt;
       pcl::PointXYZ pcl_pt;
-      double distance;
+      double distance, signed_distance;
     };
 
     struct ProcessPointCloudResult{
