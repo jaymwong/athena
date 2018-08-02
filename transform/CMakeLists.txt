@@ -8,7 +8,6 @@ find_package(catkin REQUIRED
 		geometry_msgs
   	tf_conversions
 		eigen_conversions
-		message_generation
 )
 
 find_package(cmake_modules REQUIRED)
@@ -23,21 +22,11 @@ endif()
 
 catkin_python_setup()
 
-add_message_files(DIRECTORY msg
-  FILES
-  HomogeneousTransform.msg
-	HomogeneousTransforms.msg
-)
-
-generate_messages(
-  DEPENDENCIES
-  std_msgs
-)
 
 catkin_package(
 	INCLUDE_DIRS include
 	LIBRARIES athena_transform
-	CATKIN_DEPENDS roscpp message_generation
+	CATKIN_DEPENDS roscpp
 	DEPENDS EIGEN3
 )
 

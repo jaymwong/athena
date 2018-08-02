@@ -34,8 +34,6 @@
 #include <pcl/features/moment_of_inertia_estimation.h>
 
 #include <athena/transform/conversions.h>
-// Athena supported message types
-#include <athena_pointcloud/CloudGeometries.h>
 
 #include "athena/pointcloud/conversions.h"
 #include "athena/pointcloud/utils.h"
