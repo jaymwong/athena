@@ -32,6 +32,7 @@ namespace athena{
 
     pcl::PointXYZ toPclPointXYZ(Eigen::Vector3d vec);
     pcl::PointXYZ toPclPointXYZ(geometry_msgs::PointStamped msg);
+    pcl::PointXYZ toPclPointXYZ(boost::array<float, 3> array);
 
     sensor_msgs::PointCloud2 toSensorMsgPointCloud2(pcl::PointCloud<pcl::PointXYZ> pcl_cloud);
     sensor_msgs::PointCloud2 toSensorMsgPointCloud2(pcl::PointCloud<pcl::PointXYZRGB> pcl_cloud);

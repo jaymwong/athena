@@ -25,6 +25,14 @@ void athena::pointcloud::pointcloudToBGRImage(const pcl::PointCloud<pcl::PointXY
   }
 }
 
+pcl::PointXYZ athena::conversions::toPclPointXYZ(boost::array<float, 3> array){
+  pcl::PointXYZ pt;
+  pt.x = array[0];
+  pt.y = array[1];
+  pt.z = array[2];
+  return pt;
+}
+
 Eigen::Vector3d athena::conversions::toEigenVector3d(pcl::PointXYZ pt){
   Eigen::Vector3d vec;
   vec.x() = pt.x;

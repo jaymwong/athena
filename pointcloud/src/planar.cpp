@@ -1,5 +1,55 @@
 #include "athena/pointcloud/planar.h"
 
+
+athena::pointcloud::PlaneEstimationResult athena::pointcloud::estimatePlanarModel(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, double thresh){
+  std::cout << "Estimating planar model...\n";
+  PlaneEstimationResult result;
+
+  pcl::SACSegmentation<pcl::PointXYZ> *sac_seg = new pcl::SACSegmentation<pcl::PointXYZ>;
+
+  pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients ());
+  pcl::PointIndices::Ptr inliers (new pcl::PointIndices ());
+
+  sac_seg->setOptimizeCoefficients (true); // Optional
+  sac_seg->setModelType (pcl::SACMODEL_PLANE);
+  sac_seg->setMethodType (pcl::SAC_RANSAC);
+  sac_seg->setMaxIterations (1000);
+  sac_seg->setDistanceThreshold (thresh);
+
+  sac_seg->setInputCloud ((*cloud).makeShared ());
+  sac_seg->segment (*inliers, *coefficients);
+  if (inliers->indices.size () == 0) {
+    ROS_WARN_STREAM ("Could not estimate a planar model for the given dataset.");
+    result.success = false;
+    return result;
+  }
+
+  // Extract the planar inliers from the input cloud
+  pcl::ExtractIndices<pcl::PointXYZ> extract;
+  extract.setInputCloud ((*cloud).makeShared ());
+  extract.setIndices(inliers);
+  extract.setNegative (false);
+
+  // Get the points associated with the planar surface
+  pcl::PointCloud<pcl::PointXYZ>::Ptr plane_cloud (new pcl::PointCloud<pcl::PointXYZ> ());
+  extract.filter (*plane_cloud);
+
+  result.plane_cloud = plane_cloud;
+  result.coefficients = coefficients;
+  result.success = true;
+  std::cout << "Success.\n";
+
+  coefficients.reset();
+  inliers.reset();
+
+  return result;
+}
+
+
+athena::pointcloud::PlanarModel* athena::pointcloud::createPlanarModelFromCoefficients(pcl::ModelCoefficients::Ptr coefficients){
+  return new athena::pointcloud::PlanarModel(coefficients->values[0], coefficients->values[1], coefficients->values[2], coefficients->values[3]);
+}
+
 athena::pointcloud::PlanarModel::PlanarModel(double a, double b, double c, double d){
   this->a = a;
   this->b = b;

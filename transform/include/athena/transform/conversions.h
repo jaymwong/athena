@@ -33,6 +33,7 @@ namespace athena{
 
     geometry_msgs::Pose toGeometryMsgPose(Eigen::Vector3d vec);
     geometry_msgs::Point toGeometryMsgPoint(Eigen::Vector3d vec);
+    geometry_msgs::Point toGeometryMsgPoint(boost::array<float, 3> array);
 
     Eigen::Vector3d toEigenVector3d(geometry_msgs::Pose pose);
     Eigen::Vector3d toEigenVector3d(geometry_msgs::PoseStamped pt);
