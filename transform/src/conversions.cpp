@@ -178,6 +178,14 @@ geometry_msgs::Point athena::conversions::toGeometryMsgPoint(Eigen::Vector3d vec
   return result;
 }
 
+geometry_msgs::Point athena::conversions::toGeometryMsgPoint(boost::array<float, 3> array){
+  geometry_msgs::Point result;
+  result.x = array[0];
+  result.y = array[1];
+  result.z = array[2];
+  return result;
+}
+
 void athena::transform::publish_matrix_as_tf(tf::TransformBroadcaster &br, Eigen::Matrix4d transformation_matrix, std::string root, std::string name){
   Eigen::Affine3d affine;
   affine.matrix() = transformation_matrix;

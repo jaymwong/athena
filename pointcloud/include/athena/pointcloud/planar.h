@@ -8,6 +8,7 @@
 namespace athena{
   namespace pointcloud{
 
+    // Processing the planar model with plane removal and distance functions
     struct ClosestPointResult{
       Eigen::Vector3d pt;
       pcl::PointXYZ pcl_pt;
@@ -32,6 +33,17 @@ namespace athena{
 
         ProcessPointCloudResult processPointCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, double thresh);
     };
+
+
+    struct PlaneEstimationResult{
+      bool success;
+      pcl::ModelCoefficients::Ptr coefficients;
+      pcl::PointCloud<pcl::PointXYZ>::Ptr plane_cloud;
+    };
+
+    PlaneEstimationResult estimatePlanarModel(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,  double thresh);
+    athena::pointcloud::PlanarModel* createPlanarModelFromCoefficients(pcl::ModelCoefficients::Ptr coefficients);
+
   };
 };
 
