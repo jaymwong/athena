@@ -4,6 +4,9 @@
 #include <ros/ros.h>
 #include <Eigen/Core>
 #include <athena/pointcloud/utils.h>
+#include <athena/transform/conversions.h>
+#include <athena/pointcloud/conversions.h>
+#include <athena_msgs/PlanarModel.h>
 
 namespace athena{
   namespace pointcloud{
@@ -31,7 +34,7 @@ namespace athena{
         int getPointRelativeDirection(pcl::PointXYZ point);
         int getPointRelativeDirection(Eigen::Vector3d point);
 
-        ProcessPointCloudResult processPointCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, double thresh);
+        ProcessPointCloudResult processPointCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, double thresh, Eigen::Matrix4d to_world_frame=Eigen::Matrix4d::Identity());
     };
 
 
@@ -43,6 +46,12 @@ namespace athena{
 
     PlaneEstimationResult estimatePlanarModel(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,  double thresh);
     athena::pointcloud::PlanarModel* createPlanarModelFromCoefficients(pcl::ModelCoefficients::Ptr coefficients);
+
+  };
+
+  namespace conversions{
+    athena_msgs::PlanarModel toPlanarModelMsg(athena::pointcloud::PlanarModel *model, std::string frame_id);
+    athena::pointcloud::PlanarModel* fromPlanarModelmsg(athena_msgs::PlanarModel msg);
 
   };
 };

@@ -89,7 +89,7 @@ int athena::pointcloud::PlanarModel::getPointRelativeDirection(Eigen::Vector3d p
   return -1;
 }
 
-athena::pointcloud::ProcessPointCloudResult athena::pointcloud::PlanarModel::processPointCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, double thresh){
+athena::pointcloud::ProcessPointCloudResult athena::pointcloud::PlanarModel::processPointCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, double thresh, Eigen::Matrix4d to_world_frame){
   athena::pointcloud::ProcessPointCloudResult result;
   result.inliers = pcl::PointCloud<pcl::PointXYZ>::Ptr(new pcl::PointCloud<pcl::PointXYZ>);
   result.outliers = pcl::PointCloud<pcl::PointXYZ>::Ptr(new pcl::PointCloud<pcl::PointXYZ>);
@@ -103,8 +103,28 @@ athena::pointcloud::ProcessPointCloudResult athena::pointcloud::PlanarModel::pro
       result.inliers->points.push_back(cloud->points[i]);
     }
     else {
-      result.outliers->points.push_back(cloud->points[i]);
+      // Finally check the closest point in the world frame to determine sign
+      Eigen::Vector3d pt_w = athena::transform::transform_point(to_world_frame, athena::conversions::toEigenVector3d(cloud->points[i]));
+      Eigen::Vector3d closest_pt_w = athena::transform::transform_point(to_world_frame, closest_pt_result.pt);
+      if (closest_pt_w.z() > pt_w.z()) { result.inliers->points.push_back(cloud->points[i]); }
+      else { result.outliers->points.push_back(cloud->points[i]); }
     }
   }
   return result;
+}
+
+
+athena_msgs::PlanarModel athena::conversions::toPlanarModelMsg(athena::pointcloud::PlanarModel *model, std::string frame_id){
+  athena_msgs::PlanarModel msg;
+  msg.a = model->a;
+  msg.b = model->b;
+  msg.c = model->c;
+  msg.d = model->d;
+  msg.header.frame_id = frame_id;
+  return msg;
+}
+
+
+athena::pointcloud::PlanarModel* athena::conversions::fromPlanarModelmsg(athena_msgs::PlanarModel msg){
+  return new athena::pointcloud::PlanarModel(msg.a, msg.b, msg.c, msg.d);
 }

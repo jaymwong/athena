@@ -179,26 +179,26 @@ std::vector<int> athena::pointcloud::sortAABBDimensions(Eigen::Vector3d AABB_dim
   if (AABB_dimensions.z() > AABB_dimensions.y()) {
     if (AABB_dimensions.z() > AABB_dimensions.x()) {
       if (AABB_dimensions.x() > AABB_dimensions.y()) {
-        std::cout << "Z > X > Y" << "\n";
+        // std::cout << "Z > X > Y" << "\n";
         sorted_index = {1, 2, 0};
       } else {
-        std::cout << "Z > Y > X" << "\n";
+        // std::cout << "Z > Y > X" << "\n";
         sorted_index = {2, 1, 0};
       }
     } else {
-      std::cout << "X > Z > Y" << "\n";
+      // std::cout << "X > Z > Y" << "\n";
       sorted_index = {0, 2, 1};
     }
   } else {
     if (AABB_dimensions.z() > AABB_dimensions.x()) {
-      std::cout << "Y > Z > X" << "\n";
+      // std::cout << "Y > Z > X" << "\n";
       sorted_index = {2, 0, 1};
     } else {
       if (AABB_dimensions.x() > AABB_dimensions.y()) {
-        std::cout << "X > Y > Z" << "\n";
+        // std::cout << "X > Y > Z" << "\n";
         sorted_index = {0, 1, 2};
       } else {
-        std::cout << "Y > X > Z" << "\n";
+        // std::cout << "Y > X > Z" << "\n";
         sorted_index = {1, 0, 2};
       }
     }
