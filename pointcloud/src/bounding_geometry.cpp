@@ -1,6 +1,6 @@
 #include "athena/pointcloud/bounding_geometry.h"
 
-BoundingBoxGeometry athena::pointcloud::obtainBoundingBoxGeometry (pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud, ros::Publisher pub_transformed_cloud) {
+BoundingBoxGeometry athena::pointcloud::obtainBoundingBoxGeometry (pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud, ros::Publisher pub_transformed_cloud, BoundingRequest req_params) {
   pcl::PointCloud<pcl::PointXYZ>::Ptr transformed_cloud = pcl::PointCloud<pcl::PointXYZ>::Ptr(new pcl::PointCloud<pcl::PointXYZ>);
   BoundingBoxGeometry box_geometry;
   pcl::PointXYZ min_point_OBB, max_point_OBB, min_point_AABB, max_point_AABB;
@@ -15,15 +15,16 @@ BoundingBoxGeometry athena::pointcloud::obtainBoundingBoxGeometry (pcl::PointClo
   feature_extractor.getAABB(min_point_AABB, max_point_AABB);
   feature_extractor.getOBB(min_point_OBB, max_point_OBB, position_OBB, rotational_matrix_OBB);
 
-  auto obb_min_point = athena::pointcloud::toEigenVector3d(min_point_OBB);
-  auto obb_max_point = athena::pointcloud::toEigenVector3d(max_point_OBB);
-  auto aabb_min_point = athena::pointcloud::toEigenVector3d(min_point_AABB);
-  auto aabb_max_point = athena::pointcloud::toEigenVector3d(max_point_AABB);
-  auto position = athena::pointcloud::toEigenVector3d(position_OBB);
+  auto obb_min_point = athena::conversions::toEigenVector3d(min_point_OBB);
+  auto obb_max_point = athena::conversions::toEigenVector3d(max_point_OBB);
+  auto aabb_min_point = athena::conversions::toEigenVector3d(min_point_AABB);
+  auto aabb_max_point = athena::conversions::toEigenVector3d(max_point_AABB);
+  auto position = athena::conversions::toEigenVector3d(position_OBB);
 
   box_geometry.AABB_dimensions = aabb_max_point - aabb_min_point;
   box_geometry.OBB_dimensions = obb_max_point - obb_min_point;
 
+  // the transform gives the matrix to get the box frame from the world frame
   Eigen::Matrix4f projectionTransform(Eigen::Matrix4f::Identity());
   projectionTransform.block<3,3>(0,0) = rotational_matrix_OBB;
   projectionTransform.block<3,1>(0,3) = position.cast <float> ();
@@ -31,50 +32,63 @@ BoundingBoxGeometry athena::pointcloud::obtainBoundingBoxGeometry (pcl::PointClo
 
   box_geometry.yaw  = computeBoundingBoxYaw(rotational_matrix_OBB, position, box_geometry.AABB_dimensions, box_geometry.OBB_dimensions);
 
+  // to retrieve the actual box dimensions in world X, Y, Z- axis the cloud is rotated by -yaw and then min-max is performed using which the box dimensions
+  // and center of the box in world frame are found
   pcl::transformPointCloud(*input_cloud, *transformed_cloud, athena::transform::translation_matrix(-position[0], -position[1], -position[2]));
   pcl::transformPointCloud(*transformed_cloud, *transformed_cloud, athena::transform::euler_matrix(0, 0, -box_geometry.yaw * M_PI / 180));
   pcl::transformPointCloud(*transformed_cloud, *transformed_cloud, athena::transform::translation_matrix(position[0], position[1], position[2]));
   athena::pointcloud::publishPointCloudXYZ(pub_transformed_cloud, *transformed_cloud, "world");
   pcl::getMinMax3D (*transformed_cloud, min_point_world, max_point_world);
-  auto min_point = athena::pointcloud::toEigenVector3d(min_point_world);
-  auto max_point = athena::pointcloud::toEigenVector3d(max_point_world);
+  auto min_point = athena::conversions::toEigenVector3d(min_point_world);
+  auto max_point = athena::conversions::toEigenVector3d(max_point_world);
   Eigen::Vector3d centre_diagonal = 0.5 * (min_point + max_point);
   box_geometry.OBB_dimensions = max_point - min_point;
 
-  // centre_diagonal.z() += (0.5 * box_geometry.OBB_dimensions[2]);
-  // auto planarProperties =  athena::pointcloud::PlanarModel::getClosestPointOnPlane(centre_diagonal);
-
-  //box_geometry.OBB_dimensions[2] = planarProperties.distance;
-  //centre_diagonal[2] = centre_diagonal[2] + (0.5 * box_geometry.OBB_dimensions[2]);
+  // if the filter_yaw parameter is set to true, it is verified whether the yaw found should be used. If the object is smaller than the set length and if their
+  // x & y dimensions are within set length-width ratio (square) then the yaw is made 0. (Assumes that the object is symmetrical)
+  if (req_params.filter_yaw) {
+    if ((box_geometry.OBB_dimensions[0] < req_params.min_length) && (box_geometry.OBB_dimensions[0] / box_geometry.OBB_dimensions[1] > req_params.min_lw_ratio ||
+         box_geometry.OBB_dimensions[0] / box_geometry.OBB_dimensions[1] < req_params.max_lw_ratio)) {
+      box_geometry.yaw = 0;
+    }
+  }
 
   box_geometry.bounding_box = createVisualizationMarker(box_geometry.OBB_dimensions, centre_diagonal, box_geometry.yaw);
 
   return box_geometry;
 }
 
-// step 0 : based on AABB dimension, find the OBB axis corresponding to x, y & z of the world
-// step 1 : find angle b/w z-axis and corresponding OBB axis. If world z pt is +ve angle is angle, otherwise 180 - angle
-// step 2 : if world pt has z-axis(x /y-axis) 0, then rotate it around OBB-axis corresponding to z-axis(x/y-axis).
-// step 3 : based on AABB dimension choose the biggest in x-y axis and find the angle b/w that OBB axis and the world X-axis which is nothing but yaw
 double athena::pointcloud::computeBoundingBoxYaw(Eigen::Matrix3f rotation_matrix, Eigen::Vector3d position, Eigen::Vector3d AABB_dimensions, Eigen::Vector3d OBB_dimensions) {
   tf::TransformBroadcaster br_;
   std::vector<Eigen::Vector3d> world_point;
 
+  // the box frame without translation is created to ease the yaw calculation
   Eigen::Matrix4f projectionTransform(Eigen::Matrix4f::Identity());
   projectionTransform.block<3,3>(0,0) = rotation_matrix;
 
+  // three points in x, y & z-axis of the box frame is converted to points in world frame
   world_point = transformToWorldCoordinates(OBB_dimensions, projectionTransform.cast <double> ());
+
+  // index sort consists of the rank of X, Y & Z-axis based on decreassing order of AABB dimensions.
+  // For ex: if AABB dimesions are X - 0.1, Y - 0.05 & Z - 0.3, then index-sort looks like [1, 2, 0]
   std::vector<int> index_sort = sortAABBDimensions(AABB_dimensions);
 
-  // choose the bigger dimension in x-y plane to compute yaw
+  // bigger dimension of the box in the x-y plane of the world is chosen as the one that corresponds to world X-Axis
+  // so that the canonical grasp condition is satisfied
   if (index_sort[0] > index_sort[1]) {
     int temp = index_sort[0];
     index_sort[0] = index_sort[1];
     index_sort[1] = temp;
   }
 
+  // since the box frames have more than just yaw, it necessary to make one axis of the box (chosen based on sorting done) parallel to world-Z Axis
+  // so that there is rotation only about world Z-axis.
+  // to do the frame alignment, the initial angle difference between world Z-axis and the corresponding box-axis is calculated. the angle found is always
+  // the shortest angle to world-Z axis
   double value = double(sqrt(pow(world_point[index_sort[2]].x(), 2) + pow(world_point[index_sort[2]].y(), 2)) / world_point[index_sort[2]].norm());
   double z_world = asin(value);
+
+  // it is made sure that the box axis corresponding to world z-axis always point to the same direction as world Z irrespective of its initial orientation
   if (world_point[index_sort[2]].z() < 0) {
     if (index_sort[0] == 0) {
       projectionTransform *= athena::transform::euler_matrix(M_PI, 0, 0).cast <float> ();
@@ -89,14 +103,22 @@ double athena::pointcloud::computeBoundingBoxYaw(Eigen::Matrix3f rotation_matrix
   std::vector<Eigen::Vector3d> point1, point2;
   double value1, value2;
 
+  // since the box frame has both roll and pitch, it is necessary to rotate it back in the correct order to bring it closer to the desired orientation.
+  // Hence, the rotation is performed in both ways and the one thats brings it closer to the desired orientation is chosen.
+
+  // this rotates the box frame by angle difference computed above along that axis which corresponds to world-X axis.
   possibleTransform1 = rotateFrameAlongWorldX(OBB_dimensions, AABB_dimensions, projectionTransform.cast <double> (), z_world);
   point1 = transformToWorldCoordinates(OBB_dimensions, possibleTransform1.cast <double> ());
   value1 = double(sqrt(pow(point1[index_sort[2]].x(), 2) + pow(point1[index_sort[2]].y(), 2)) / point1[index_sort[2]].norm());
 
+  // this rotates the box frame by angle difference computed above along that axis which corresponds to world-X axis.
   possibleTransform2 = rotateFrameAlongWorldY(OBB_dimensions, AABB_dimensions, projectionTransform.cast <double> (), z_world);
   point2 = transformToWorldCoordinates(OBB_dimensions, possibleTransform2.cast <double> ());
   value2 = double(sqrt(pow(point2[index_sort[2]].x(), 2) + pow(point2[index_sort[2]].y(), 2)) / point2[index_sort[2]].norm());
 
+  // based on the resulting angle difference between world Z-axis and corresponding box axis after each rotation, the better one (the one)
+  // with smaller angle difference after rotation) is chosen. This becomes the first rotation and the second rotation is done about the other
+  // axis so that the final box frame is aligned with the world frame.
   if (value1 < value2) {
     projectionTransform = possibleTransform1;
     projectionTransform = rotateFrameAlongWorldY(OBB_dimensions, AABB_dimensions, projectionTransform.cast <double> (), asin(value1));
@@ -111,11 +133,16 @@ double athena::pointcloud::computeBoundingBoxYaw(Eigen::Matrix3f rotation_matrix
   projectionTransform.block<3,1>(0,3) = position.cast <float> ();
   athena::transform::publish_matrix_as_tf(br_, projectionTransform.cast <double> (), "world", "obb_box_corrected_frame");
 
+  // now that the frames are aligned (with just yaw rotation), yaw is calculated by finding the angle between world X-Axis
+  // and the corresponding box axis.
   value = double(sqrt(pow(world_point[index_sort[0]].y(), 2) + pow(world_point[index_sort[0]].z(), 2)) / world_point[index_sort[0]].norm());
-  if (world_point[index_sort[0]].x() * world_point[index_sort[0]].y() > 0)
+
+  if (world_point[index_sort[0]].x() * world_point[index_sort[0]].y() > 0) {
    return asin(value) * 180 / M_PI;
-  else
+  }
+  else {
    return -1 * asin(value) * 180 / M_PI;
+  }
 }
 
 visualization_msgs::Marker athena::pointcloud::createVisualizationMarker(Eigen::Vector3d OBB_dimensions, Eigen::Vector3d center, double yaw) {
@@ -181,7 +208,9 @@ std::vector<int> athena::pointcloud::sortAABBDimensions(Eigen::Vector3d AABB_dim
 
 std::vector<Eigen::Vector3d> athena::pointcloud::transformToWorldCoordinates(Eigen::Vector3d OBB_dimensions, Eigen::Matrix4d transform) {
   std::vector<Eigen::Vector3d> world_point;
-  Eigen::Vector3d pt1, pt2, pt3;
+  Eigen::Vector3d pt1(0.0, 0.0, 0.0);
+  Eigen::Vector3d pt2(0.0, 0.0, 0.0);
+  Eigen::Vector3d pt3(0.0, 0.0, 0.0);
 
   pt1.x() = 0.5 * OBB_dimensions.x();
   pt2.y() = 0.5 * OBB_dimensions.y();
@@ -195,53 +224,55 @@ std::vector<Eigen::Vector3d> athena::pointcloud::transformToWorldCoordinates(Eig
 }
 
 Eigen::Matrix4f athena::pointcloud::rotateFrameAlongWorldX(Eigen::Vector3d OBB_dimensions, Eigen::Vector3d AABB_dimensions, Eigen::Matrix4d transform, double angle) {
-  auto world_point = transformToWorldCoordinates(OBB_dimensions, transform);
+  Eigen::Matrix4d transform1 = transform;
+  auto world_point = transformToWorldCoordinates(OBB_dimensions, transform1);
   auto index_sort = sortAABBDimensions(AABB_dimensions);
   if ((world_point[index_sort[2]].y() > 0 && world_point[index_sort[0]].x() > 0) ||
       (world_point[index_sort[2]].y() < 0 && world_point[index_sort[0]].x() < 0)) {
     if (index_sort[0] == 0) {
-      transform *= athena::transform::euler_matrix(angle, 0, 0);
+      transform1 *= athena::transform::euler_matrix(angle, 0, 0);
     } else if (index_sort[0] == 1){
-      transform *= athena::transform::euler_matrix(0, angle, 0);
+      transform1 *= athena::transform::euler_matrix(0, angle, 0);
     } else {
-      transform *= athena::transform::euler_matrix(0, 0, angle);
+      transform1 *= athena::transform::euler_matrix(0, 0, angle);
     }
   } else if ((world_point[index_sort[2]].y() > 0 && world_point[index_sort[0]].x() < 0) ||
              (world_point[index_sort[2]].y() < 0 && world_point[index_sort[0]].x() > 0)) {
     if (index_sort[0] == 0) {
-      transform *= athena::transform::euler_matrix(-angle, 0, 0);
+      transform1 *= athena::transform::euler_matrix(-angle, 0, 0);
     } else if (index_sort[0] == 1){
-      transform *= athena::transform::euler_matrix(0, -angle, 0);
+      transform1 *= athena::transform::euler_matrix(0, -angle, 0);
     } else {
-      transform *= athena::transform::euler_matrix(0, 0, -angle);
+      transform1 *= athena::transform::euler_matrix(0, 0, -angle);
     }
   }
-  return transform.cast <float> ();
+  return transform1.cast <float> ();
 }
 
 Eigen::Matrix4f athena::pointcloud::rotateFrameAlongWorldY(Eigen::Vector3d OBB_dimensions, Eigen::Vector3d AABB_dimensions, Eigen::Matrix4d transform, double angle) {
-  auto world_point = transformToWorldCoordinates(OBB_dimensions, transform);
+  Eigen::Matrix4d transform1 = transform;
+  auto world_point = transformToWorldCoordinates(OBB_dimensions, transform1);
   auto index_sort = sortAABBDimensions(AABB_dimensions);
   if ((world_point[index_sort[2]].x() > 0 && world_point[index_sort[1]].y() < 0) ||
       (world_point[index_sort[2]].x() < 0 && world_point[index_sort[1]].y() > 0)) {
     if (index_sort[1] == 0) {
-      transform *= athena::transform::euler_matrix(angle, 0, 0);
+      transform1 *= athena::transform::euler_matrix(angle, 0, 0);
     } else if (index_sort[1] == 1){
-      transform *= athena::transform::euler_matrix(0, angle, 0);
+      transform1 *= athena::transform::euler_matrix(0, angle, 0);
     } else {
-      transform *= athena::transform::euler_matrix(0, 0, angle);
+      transform1 *= athena::transform::euler_matrix(0, 0, angle);
     }
   } else if ((world_point[index_sort[2]].x() > 0 && world_point[index_sort[1]].y() > 0) ||
              (world_point[index_sort[2]].x() < 0 && world_point[index_sort[1]].y() < 0)) {
     if (index_sort[1] == 0) {
-      transform *= athena::transform::euler_matrix(-angle, 0, 0);
+      transform1 *= athena::transform::euler_matrix(-angle, 0, 0);
     } else if (index_sort[1] == 1){
-      transform *= athena::transform::euler_matrix(0, -angle, 0);
+      transform1 *= athena::transform::euler_matrix(0, -angle, 0);
     } else {
-      transform *= athena::transform::euler_matrix(0, 0, -angle);
+      transform1 *= athena::transform::euler_matrix(0, 0, -angle);
     }
   }
-  return transform.cast <float> ();
+  return transform1.cast <float> ();
 }
 
 Eigen::Vector3d athena::pointcloud::computePointCloudBoundingBoxOrigin(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud){
