@@ -5,9 +5,9 @@ add_compile_options(-std=c++11)
 
 find_package(catkin REQUIRED
 	COMPONENTS
-	message_generation
 	pcl_ros
 	pcl_conversions
+	athena_msgs
 	athena_transform
 )
 
@@ -15,21 +15,10 @@ find_package(cmake_modules REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(OpenCV REQUIRED)
 
-add_message_files(DIRECTORY msg
-  FILES
-  CloudGeometry.msg
-  CloudGeometries.msg
-)
-
-generate_messages(
-  DEPENDENCIES
-  std_msgs
-)
-   
 catkin_package(
 	INCLUDE_DIRS include
 	LIBRARIES athena_pointcloud
-	CATKIN_DEPENDS roscpp message_generation pcl_ros pcl_conversions athena_transform
+	CATKIN_DEPENDS roscpp pcl_ros pcl_conversions athena_transform athena_msgs
 	DEPENDS EIGEN3
 )
 

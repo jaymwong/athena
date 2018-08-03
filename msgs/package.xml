@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>athena</name>
+  <name>athena_msgs</name>
   <version>0.0.0</version>
-  <description>The athena package</description>
+  <description>The athena_msgs package</description>
 
   <maintainer email="jmwong@csail.mit.edu">Jay M. Wong</maintainer>
 
@@ -11,12 +11,8 @@
 
   <buildtool_depend>catkin</buildtool_depend>
   <depend>roscpp</depend>
-  <depend>rospy</depend>
-  <depend>athena_msgs</depend>
-  <depend>athena_parsers</depend>
-  <depend>athena_transform</depend>
-  <depend>athena_pointcloud</depend>
-  <depend>athena_visualization</depend>
+  <depend>cmake_modules</depend>
+  <depend>std_msgs</depend>
   <depend>message_generation</depend>
   <export>
 

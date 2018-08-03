@@ -9,6 +9,7 @@
 #include <athena/transform/conversions.h>
 #include <athena/visualization/utils.h>
 #include <athena/parsers/parser_utils.h>
+#include <athena/msgs/messages.h>
 
 
 #endif
