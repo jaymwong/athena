@@ -41,6 +41,7 @@ athena::pointcloud::PlaneEstimationResult athena::pointcloud::estimatePlanarMode
 
   coefficients.reset();
   inliers.reset();
+  delete sac_seg;
 
   return result;
 }
@@ -98,17 +99,21 @@ athena::pointcloud::ProcessPointCloudResult athena::pointcloud::PlanarModel::pro
     auto closest_pt_result = this->getClosestPointOnPlane(cloud->points[i]);
     if (closest_pt_result.distance < thresh ){
       result.inliers->points.push_back(cloud->points[i]);
+      continue;
     }
-    else if (!this->getPointRelativeDirection(cloud->points[i])){
-      result.inliers->points.push_back(cloud->points[i]);
+
+    // Check if the transform is close to identity if not we will use it to further determine sign
+    if ((Eigen::Matrix4d::Identity() - to_world_frame).norm() < 0.001){
+      result.outliers->points.push_back(cloud->points[i]);
+      continue;
     }
-    else {
-      // Finally check the closest point in the world frame to determine sign
-      Eigen::Vector3d pt_w = athena::transform::transform_point(to_world_frame, athena::conversions::toEigenVector3d(cloud->points[i]));
-      Eigen::Vector3d closest_pt_w = athena::transform::transform_point(to_world_frame, closest_pt_result.pt);
-      if (closest_pt_w.z() > pt_w.z()) { result.inliers->points.push_back(cloud->points[i]); }
-      else { result.outliers->points.push_back(cloud->points[i]); }
-    }
+
+    // Finally check the closest point in the world frame to determine sign
+    Eigen::Vector3d pt_w = athena::transform::transform_point(to_world_frame, athena::conversions::toEigenVector3d(cloud->points[i]));
+    Eigen::Vector3d closest_pt_w = athena::transform::transform_point(to_world_frame, closest_pt_result.pt);
+    if (closest_pt_w.z() > pt_w.z()) { result.inliers->points.push_back(cloud->points[i]); }
+    else { result.outliers->points.push_back(cloud->points[i]); }
+
   }
   return result;
 }
