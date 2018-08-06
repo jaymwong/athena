@@ -63,6 +63,8 @@ struct PointCloudProperties{
 namespace athena {
   namespace pointcloud{
 
+    pcl::PointCloud<pcl::PointXYZ>::Ptr curatePointCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud);
+
     Eigen::Vector3d computePointCloudMedian(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud);
     Eigen::Vector3d computePointCloudMedian(std::vector<double> cluster_pt_x, std::vector<double> cluster_pt_y, std::vector<double> cluster_pt_z);
     Eigen::Vector3d computePointCloudMedian(std::vector<Eigen::Vector3d> vec);
