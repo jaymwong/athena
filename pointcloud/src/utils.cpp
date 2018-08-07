@@ -1,5 +1,39 @@
 #include "athena/pointcloud/utils.h"
 
+
+pcl::PointCloud<pcl::PointXYZ>::Ptr athena::pointcloud::curatePointCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud){
+  // Remove the Nans from the point cloud (according to https://stackoverflow.com/questions/47233474/icp-segmentation-fault-pcl
+  // it is best to first transform the cloud to an unorganized cloud before curating)
+  ROS_WARN("[athena/curatePointCloud] > should only be used in the camera optical frame!");
+  cloud->width    = cloud->width * cloud->height;
+  cloud->height   = 1;
+  cloud->is_dense = false;
+  cloud->points.resize (cloud->width * cloud->height);
+  std::vector<int> indices;
+  pcl::removeNaNFromPointCloud(*cloud, *cloud, indices);
+  std::cout << "Cloud size: " << cloud->points.size() << "\n";
+
+  // Remove points that are too close to eachother (within a mm)
+  pcl::PCLPointCloud2::Ptr cloud_in (new pcl::PCLPointCloud2 ());
+  pcl::PCLPointCloud2::Ptr cloud_filtered (new pcl::PCLPointCloud2 ());
+  pcl::toPCLPointCloud2(*cloud, *cloud_in);
+  pcl::VoxelGrid<pcl::PCLPointCloud2> sor;
+  sor.setInputCloud (cloud_in);
+  sor.setLeafSize (0.001f, 0.001f, 0.001f);
+  sor.filter (*cloud_filtered);
+  pcl::fromPCLPointCloud2(*cloud_filtered, *cloud);
+  std::cout << "Cloud size: " << cloud->points.size() << "\n";
+
+  // Remove points that make no sense relative to the camera (behind it or too close)
+  pcl::PassThrough<pcl::PointXYZ> pass;
+  pass.setInputCloud (cloud);
+  pass.setFilterFieldName ("z");
+  pass.setFilterLimits (0.1, kInfinity);
+  pass.filter (*cloud);
+  std::cout << "Cloud size: " << cloud->points.size() << "\n";
+  return cloud;
+}
+
 // Computes the median of a point cloud
 Eigen::Vector3d athena::pointcloud::computePointCloudMedian(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud){
   std::vector<double> cloud_x, cloud_y, cloud_z;
