@@ -226,6 +226,15 @@ geometry_msgs::Pose athena::conversions::toGeometryMsgPose(Eigen::Vector3d vec){
   return pose;
 }
 
+geometry_msgs::Pose athena::conversions::toGeometryMsgPose(Eigen::Vector3d vec, Eigen::Quaternionf quat){
+  auto result = toGeometryMsgPose(vec);
+  result.orientation.x = quat.x();
+  result.orientation.y = quat.y();
+  result.orientation.z = quat.z();
+  result.orientation.w = quat.w();
+  return result;
+}
+
 Eigen::Vector3d athena::conversions::toEigenVector3d(geometry_msgs::Pose pose){
   Eigen::Vector3d vec(pose.position.x, pose.position.y, pose.position.z);
   return vec;

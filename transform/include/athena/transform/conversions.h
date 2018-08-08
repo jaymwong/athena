@@ -32,6 +32,7 @@ namespace athena{
     Eigen::Matrix4d toEigenMatrix4d(const float transform[]);
 
     geometry_msgs::Pose toGeometryMsgPose(Eigen::Vector3d vec);
+    geometry_msgs::Pose toGeometryMsgPose(Eigen::Vector3d vec, Eigen::Quaternionf quat);
     geometry_msgs::Point toGeometryMsgPoint(Eigen::Vector3d vec);
     geometry_msgs::Point toGeometryMsgPoint(boost::array<float, 3> array);
 
