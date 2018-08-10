@@ -202,8 +202,8 @@ void athena::transform::publish_matrix_as_tf(tf::TransformBroadcaster &br, Eigen
 
 Eigen::Matrix4d athena::conversions::toEigenMatrix4d(const float transform[]){
   Eigen::MatrixXd obj_pose;
-  obj_pose.resize(HOMOGENOUS_TRANFORM_ELEMENTS, 1);
-  for (int i = 0; i < HOMOGENOUS_TRANFORM_ELEMENTS; i++){
+  obj_pose.resize(16, 1);
+  for (int i = 0; i < 16; i++){
     obj_pose(i, 0) = transform[i];
   }
   obj_pose.resize(4, 4);
@@ -246,8 +246,8 @@ Eigen::VectorXd athena::conversions::toEigenVectorXd(std::vector<double> input){
 
 Eigen::Matrix4d athena::conversions::toEigenMatrix4d(const double transform[]){
   Eigen::MatrixXd obj_pose;
-  obj_pose.resize(HOMOGENOUS_TRANFORM_ELEMENTS, 1);
-  for (int i = 0; i < HOMOGENOUS_TRANFORM_ELEMENTS; i++){
+  obj_pose.resize(16, 1);
+  for (int i = 0; i < 16; i++){
     obj_pose(i, 0) = transform[i];
   }
   obj_pose.resize(4, 4);
@@ -261,12 +261,12 @@ Eigen::Matrix4d athena::conversions::toEigenMatrix4d(const double transform[]){
   return obj_pose;
 }
 
-boost::array<double, HOMOGENOUS_TRANFORM_ELEMENTS> athena::conversions::toBoostArrayd(Eigen::Matrix4d transform){
-  boost::array<double, HOMOGENOUS_TRANFORM_ELEMENTS> transform_array;
+boost::array<double, 16> athena::conversions::toBoostArrayd(Eigen::Matrix4d transform){
+  boost::array<double, 16> transform_array;
   Eigen::MatrixXd resize_transform = transform;
-  resize_transform.resize(1, HOMOGENOUS_TRANFORM_ELEMENTS);
+  resize_transform.resize(1, 16);
 
-  for (int i = 0; i < HOMOGENOUS_TRANFORM_ELEMENTS; i++){
+  for (int i = 0; i < 16; i++){
     transform_array[i] = resize_transform(0, i);
   }
   return transform_array;
@@ -347,5 +347,17 @@ Eigen::Vector3d athena::conversions::toEigenVector3d(geometry_msgs::PoseStamped 
 std::string athena::conversions::toString(Eigen::Vector3d vec){
   std::string result = "";
   result = result + std::to_string(vec.x()) + " " + std::to_string(vec.y()) + " " + std::to_string(vec.z());
+  return result;
+}
+
+std::string athena::conversions::toString(std::vector<double> v){
+  std::string result = "";
+  for (auto val: v){ result = result + std::to_string(val) + " "; }
+  return result;
+}
+
+std::string athena::conversions::toString(std::vector<int> v){
+  std::string result = "";
+  for (auto val: v){ result = result + std::to_string(val) + " "; }
   return result;
 }

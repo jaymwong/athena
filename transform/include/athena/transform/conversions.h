@@ -18,9 +18,6 @@
 #include <tf_conversions/tf_eigen.h>
 #include <Eigen/Core>
 
-
-#define HOMOGENOUS_TRANFORM_ELEMENTS 16
-
 struct Matrix4dStatistics {
   std::vector<double> mean, median, std;
 };
@@ -40,13 +37,15 @@ namespace athena{
     Eigen::Vector3d toEigenVector3d(geometry_msgs::PoseStamped pt);
     Eigen::VectorXd toEigenVectorXd(std::vector<double> input);
 
-    boost::array<double, HOMOGENOUS_TRANFORM_ELEMENTS> toBoostArrayd(Eigen::Matrix4d transform);
+    boost::array<double, 16> toBoostArrayd(Eigen::Matrix4d transform);
     boost::array<double, 3> toBoostArray3d(Eigen::Vector3d vec);
     std::vector<float> toStdVectorf(Eigen::Vector3d mat);
 
     tf::Transform toTfTransform(geometry_msgs::PoseStamped pose);
 
     std::string toString(Eigen::Vector3d vec);
+    std::string toString(std::vector<double> v);
+    std::string toString(std::vector<int> v);
   };
 
   namespace transform{
