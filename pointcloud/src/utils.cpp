@@ -107,6 +107,10 @@ PointCloudProperties athena::pointcloud::computePointCloudMinMax(pcl::PointCloud
   results.min_point = minPoint;
   results.max_point = maxPoint;
 
+  results.x = Eigen::Vector2d(minPoint.x, maxPoint.x);
+  results.y = Eigen::Vector2d(minPoint.y, maxPoint.y);
+  results.z = Eigen::Vector2d(minPoint.z, maxPoint.z);
+
   // std::cout << "Min Point: " << minPoint.x << " " << minPoint.y << " " << minPoint.z << "\n";
   // std::cout << "Max Point: " << maxPoint.x << " " << maxPoint.y << " " << maxPoint.z << "\n";
   return results;
@@ -129,6 +133,21 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr athena::pointcloud::removeNegativeWorldPoint
   Eigen::Matrix4d world_to_cam = cam_to_world.inverse();   // Transform the cloud back into camera frame
   pcl::transformPointCloud(*out_cloud, *out_cloud, world_to_cam);
   return out_cloud;
+}
+
+pcl::PointCloud<pcl::PointXYZ>::Ptr athena::pointcloud::doPassThroughCubeCrop(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, Eigen::Matrix4d wTc, pcl::PointXYZ pt, double radius){
+  pcl::PointCloud<pcl::PointXYZ>::Ptr result = pcl::PointCloud<pcl::PointXYZ>::Ptr(new pcl::PointCloud<pcl::PointXYZ>);
+  copyPointCloud(*cloud, *result);
+  pcl::transformPointCloud(*result, *result, wTc);
+
+  // Now transform the camera_frame point into the world frame; then do the crop
+  Eigen::Vector3d world_pt = athena::transform::transform_point(wTc, athena::conversions::toEigenVector3d(pt));
+  result = athena::pointcloud::doPassThroughCubeCrop(result, athena::conversions::toPclPointXYZ(world_pt), radius);
+
+  // Transform the cloud back into the camera frame to be visualized
+  Eigen::Matrix4d cTw = wTc.inverse();
+  pcl::transformPointCloud(*result, *result, cTw);
+  return result;
 }
 
 pcl::PointCloud<pcl::PointXYZ>::Ptr athena::pointcloud::doPassThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, std::string axis, double min, double max){

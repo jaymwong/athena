@@ -54,10 +54,14 @@
 #include <pcl/segmentation/extract_clusters.h>
 #include <pcl/geometry/triangle_mesh.h>
 
+#include <athena/transform/conversions.h>
+#include <athena/pointcloud/conversions.h>
+
 #define kInfinity 9999999
 
 struct PointCloudProperties{
   pcl::PointXYZ min_point, max_point;
+  Eigen::Vector2d x, y, z;
 };
 
 namespace athena {
@@ -80,6 +84,7 @@ namespace athena {
 
     pcl::PointCloud<pcl::PointXYZ>::Ptr doPassThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, std::string axis, double min, double max);
     pcl::PointCloud<pcl::PointXYZ>::Ptr doPassThroughCubeCrop(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, pcl::PointXYZ pt, double radius);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr doPassThroughCubeCrop(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, Eigen::Matrix4d wTc, pcl::PointXYZ pt, double radius);
 
     pcl::PointIndices::Ptr findCloudInliers(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, pcl::PointXYZ pt, double radius_x, double radius_y, double radius_z);
     pcl::PointCloud<pcl::PointXYZ>::Ptr removeSubCloudFromOriginalCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr original_cloud_, pcl::PointXYZ pt,
