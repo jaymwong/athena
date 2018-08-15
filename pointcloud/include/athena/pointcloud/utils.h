@@ -75,6 +75,9 @@ namespace athena {
 
     std::vector<double> getMinAndMaxFromVector(std::vector<double> my_vector);
 
+    // Naively projects the pointcloud into the z=0 plane; squashes the cloud
+    pcl::PointCloud<pcl::PointXYZ>::Ptr naivePointCloudProjection(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud);
+
     // Publishing helper function
     void publishPointCloudXYZ(ros::Publisher pub, pcl::PointCloud<pcl::PointXYZ> &pcl_cloud, std::string frame_id);
     void publishPointCloudXYZRGB(ros::Publisher pub, pcl::PointCloud<pcl::PointXYZRGB> &pcl_cloud, std::string frame_id);
@@ -82,23 +85,13 @@ namespace athena {
     // Directly just computing the min and max from the input cloud and calling that a tentative bounding geometry
     PointCloudProperties computePointCloudMinMax(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud);
 
-    pcl::PointCloud<pcl::PointXYZ>::Ptr doPassThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, std::string axis, double min, double max);
-    pcl::PointCloud<pcl::PointXYZ>::Ptr doPassThroughCubeCrop(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, pcl::PointXYZ pt, double radius);
-    pcl::PointCloud<pcl::PointXYZ>::Ptr doPassThroughCubeCrop(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, Eigen::Matrix4d wTc, pcl::PointXYZ pt, double radius);
-
     pcl::PointIndices::Ptr findCloudInliers(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, pcl::PointXYZ pt, double radius_x, double radius_y, double radius_z);
-    pcl::PointCloud<pcl::PointXYZ>::Ptr removeSubCloudFromOriginalCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr original_cloud_, pcl::PointXYZ pt,
-                                                     double radius_x, double radius_y, double radius_z);
-
-    pcl::PointCloud<pcl::PointXYZ>::Ptr removeNegativeWorldPoints(pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud, Eigen::Matrix4d cam_to_world);
 
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr createColorizedPointCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, int r, int g, int b);
 
     pcl::PointCloud<pcl::PointXYZ>::Ptr convertClusterToPointCloud(int idx, std::vector <pcl::PointIndices> clusters, pcl::PointCloud<pcl::PointXYZ>::Ptr raw_cloud);
 
     pcl::PointCloud<pcl::PointXYZ>::Ptr getMaxEuclideanClusterFromPointCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud, double tolerance);
-    pcl::PointCloud<pcl::PointXYZ>::Ptr getCloudPointsWithinStdDev(pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud, double thresh);
-
 
     pcl::PointCloud<pcl::PointXYZ>::Ptr doNeighborRadiusSearch(pcl::PointXYZ searchPoint, pcl::KdTreeFLANN<pcl::PointXYZ> kd_tree_flann,
                                                                pcl::PointCloud<pcl::PointXYZ>::Ptr raw_cloud, double radius);
