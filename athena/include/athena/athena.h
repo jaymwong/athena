@@ -5,7 +5,8 @@
 #include <athena/pointcloud/conversions.h>
 #include <athena/pointcloud/utils.h>
 #include <athena/pointcloud/planar.h>
-#include <athena/pointcloud/cropping.h>
+#include <athena/pointcloud/segmentation.h>
+#include <athena/pointcloud/registration.h>
 #include <athena/pointcloud/bounding_geometry.h>
 
 #include <athena/transform/conversions.h>

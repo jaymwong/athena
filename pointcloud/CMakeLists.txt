@@ -36,7 +36,8 @@ add_library(athena_pointcloud
 	src/utils.cpp
 	src/conversions.cpp
 	src/planar.cpp
-	src/cropping.cpp
+	src/segmentation.cpp
+	src/registration.cpp
 	src/bounding_geometry.cpp
 )
 add_dependencies(athena_pointcloud ${catkin_EXPORTED_TARGETS} )
