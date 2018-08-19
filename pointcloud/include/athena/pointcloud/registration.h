@@ -17,6 +17,7 @@
 #include <pcl/registration/icp.h>
 
 #define kDefaultMaximumIterations 100
+#define kInfinity 9999999
 
 struct RegistrationResult{
   Eigen::Matrix4d transform;
@@ -31,8 +32,14 @@ struct CorrespondenceScoreResult{
 class RegistrationOptions{
   public:
     int max_iterations;
+    bool global_init, strict_update;
+    double correspondence_thresh;
     RegistrationOptions(){
       max_iterations = kDefaultMaximumIterations;
+
+      global_init = false;
+      strict_update = false;
+      correspondence_thresh = 0.005;
     }
     ~RegistrationOptions(){}
 };
@@ -45,6 +52,55 @@ namespace athena{
 
     int findNumCorrespondences(pcl::PointCloud<pcl::PointXYZ>::Ptr source_cloud, pcl::PointCloud<pcl::PointXYZ>::Ptr target_cloud, double thresh);
     CorrespondenceScoreResult computeCorrespondenceScore(pcl::PointCloud<pcl::PointXYZ>::Ptr source_cloud, pcl::PointCloud<pcl::PointXYZ>::Ptr target_cloud, double thresh);
+  };
+
+  class Registrator{
+    public:
+      pcl::PointCloud<pcl::PointXYZ>::Ptr model, scene, result_cloud;
+      RegistrationOptions options;
+      bool has_global_init;
+      Eigen::Matrix4d transform;
+      double max_score;
+
+      Registrator(pcl::PointCloud<pcl::PointXYZ>::Ptr model, pcl::PointCloud<pcl::PointXYZ>::Ptr scene, RegistrationOptions options=RegistrationOptions()){
+        this->model = model;
+        this->scene = scene;
+        this->options = options;
+        transform = Eigen::Matrix4d::Identity();
+        has_global_init = false || !options.global_init;
+        max_score = -kInfinity;
+        result_cloud = pcl::PointCloud<pcl::PointXYZ>::Ptr(new pcl::PointCloud<pcl::PointXYZ>);
+      }
+      ~Registrator(){}
+
+      RegistrationResult performRegistration(){
+        RegistrationResult result;
+        if (!has_global_init){ // First run template-based registration to identify an initial alignment
+          auto reg_result = athena::pointcloud::performTemplateBasedRegistration(model, scene);
+          auto score = athena::pointcloud::computeCorrespondenceScore(scene, reg_result.cloud, options.correspondence_thresh);
+
+          if (score.s_to_m + score.m_to_s > max_score || !options.strict_update){
+            result_cloud = reg_result.cloud;
+            transform = reg_result.transform;
+            max_score = score.s_to_m + score.m_to_s;
+            has_global_init = true;
+          }
+        }
+        else{ // Then using that seed, run ICP to refine the registration and only update when the result is "better"
+          pcl::PointCloud<pcl::PointXYZ>::Ptr model_cloud = pcl::PointCloud<pcl::PointXYZ>::Ptr(new pcl::PointCloud<pcl::PointXYZ>);
+          pcl::transformPointCloud(*model, *model_cloud, transform);
+          auto reg_result = athena::pointcloud::performPointBasedIterativeRegistration(model_cloud, scene);
+          auto score = athena::pointcloud::computeCorrespondenceScore(scene, reg_result.cloud, options.correspondence_thresh);
+          if (score.s_to_m + score.m_to_s > max_score || !options.strict_update){
+            result_cloud = reg_result.cloud;
+            transform = reg_result.transform * transform;
+            max_score = score.s_to_m + score.m_to_s;
+          }
+        }
+        result.cloud = result_cloud;
+        result.transform = transform;
+        return result;
+      }
   };
 };
 
