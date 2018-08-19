@@ -55,6 +55,8 @@ namespace athena{
   };
 
   class Registrator{
+    private:
+      pcl::PointCloud<pcl::PointXYZ>::Ptr transformed_model_cloud;
     public:
       pcl::PointCloud<pcl::PointXYZ>::Ptr model, scene, result_cloud;
       RegistrationOptions options;
@@ -62,9 +64,8 @@ namespace athena{
       Eigen::Matrix4d transform;
       double max_score;
 
-      Registrator(pcl::PointCloud<pcl::PointXYZ>::Ptr model, pcl::PointCloud<pcl::PointXYZ>::Ptr scene, RegistrationOptions options=RegistrationOptions()){
+      Registrator(pcl::PointCloud<pcl::PointXYZ>::Ptr model, RegistrationOptions options=RegistrationOptions()){
         this->model = model;
-        this->scene = scene;
         this->options = options;
         transform = Eigen::Matrix4d::Identity();
         has_global_init = false || !options.global_init;
@@ -73,7 +74,8 @@ namespace athena{
       }
       ~Registrator(){}
 
-      RegistrationResult performRegistration(){
+      RegistrationResult performRegistration(pcl::PointCloud<pcl::PointXYZ>::Ptr scene_cloud){
+        scene = scene_cloud;
         RegistrationResult result;
         if (!has_global_init){ // First run template-based registration to identify an initial alignment
           auto reg_result = athena::pointcloud::performTemplateBasedRegistration(model, scene);
@@ -87,9 +89,9 @@ namespace athena{
           }
         }
         else{ // Then using that seed, run ICP to refine the registration and only update when the result is "better"
-          pcl::PointCloud<pcl::PointXYZ>::Ptr model_cloud = pcl::PointCloud<pcl::PointXYZ>::Ptr(new pcl::PointCloud<pcl::PointXYZ>);
-          pcl::transformPointCloud(*model, *model_cloud, transform);
-          auto reg_result = athena::pointcloud::performPointBasedIterativeRegistration(model_cloud, scene);
+          transformed_model_cloud = pcl::PointCloud<pcl::PointXYZ>::Ptr(new pcl::PointCloud<pcl::PointXYZ>);
+          pcl::transformPointCloud(*model, *transformed_model_cloud, transform);
+          auto reg_result = athena::pointcloud::performPointBasedIterativeRegistration(transformed_model_cloud, scene);
           auto score = athena::pointcloud::computeCorrespondenceScore(scene, reg_result.cloud, options.correspondence_thresh);
           if (score.s_to_m + score.m_to_s > max_score || !options.strict_update){
             result_cloud = reg_result.cloud;

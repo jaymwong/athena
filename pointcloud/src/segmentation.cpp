@@ -42,16 +42,6 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr athena::pointcloud::doPassThroughCubeCrop(pc
   return out_cloud;
 }
 
-
-pcl::PointCloud<pcl::PointXYZ>::Ptr athena::pointcloud::naivePointCloudProjection(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud){
-  pcl::PointCloud<pcl::PointXYZ>::Ptr out_cloud (new pcl::PointCloud<pcl::PointXYZ>);
-  for (pcl::PointXYZ pt: cloud->points){
-    pcl::PointXYZ new_pt(pt.x, pt.y, 0.0);
-    out_cloud->points.push_back(new_pt);
-  }
-  return out_cloud;
-}
-
 pcl::PointCloud<pcl::PointXYZ>::Ptr athena::pointcloud::removeSubCloudFromOriginalCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr original_cloud_, pcl::PointXYZ pt,
                                        double radius_x, double radius_y, double radius_z) {
   pcl::PointIndices::Ptr inliers(new pcl::PointIndices());
