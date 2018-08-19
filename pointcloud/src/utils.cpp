@@ -224,3 +224,12 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr athena::pointcloud::doNeighborRadiusSearch(p
    //std::cout << "Extracted cloud size: " << extracted_cloud->points.size()  << "\n";
    return extracted_cloud;
 }
+
+pcl::PointCloud<pcl::PointXYZ>::Ptr athena::pointcloud::naivePointCloudProjection(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud){
+  pcl::PointCloud<pcl::PointXYZ>::Ptr result (new pcl::PointCloud<pcl::PointXYZ>);
+  for (pcl::PointXYZ pt: cloud->points){
+    pcl::PointXYZ new_pt(pt.x, pt.y, 0.0);
+    result->points.push_back(new_pt);
+  }
+  return result;
+}
